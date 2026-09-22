@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: parking_lot_navigator
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Spotless check
+        run: ./gradlew spotlessCheck
+
+      # 실제 PostgreSQL에 마이그레이션을 적용해 SQL 오류와 파일명 규칙을 검증
+      - name: Flyway migrate
+        run: |
+          mkdir -p src/main/resources/db/migration
+          docker run --rm --network host \
+            -v "$PWD/src/main/resources/db/migration:/flyway/sql" \
+            flyway/flyway:12.4-alpine \
+            -url=jdbc:postgresql://localhost:5432/parking_lot_navigator \
+            -user=postgres -password=postgres \
+            -validateMigrationNaming=true \
+            migrate
+
+      # 컴파일, 테스트, jar 패키징까지 수행
+      - name: Build
+        run: ./gradlew build
