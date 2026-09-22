@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: parking-lot-navigator
+  profiles:
+    default: local
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
