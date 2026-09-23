@@ -45,12 +45,14 @@ jobs:
       # 실제 PostgreSQL에 마이그레이션을 적용해 SQL 오류와 파일명 규칙을 검증
       - name: Flyway migrate
         run: |
-          mkdir -p src/main/resources/db/migration
+          mkdir -p src/main/resources/db/migration src/main/resources/db/seed
           docker run --rm --network host \
-            -v "$PWD/src/main/resources/db/migration:/flyway/sql" \
+            -v "$PWD/src/main/resources/db/migration:/flyway/sql/migration" \
+            -v "$PWD/src/main/resources/db/seed:/flyway/sql/seed" \
             flyway/flyway:12.4-alpine \
             -url=jdbc:postgresql://localhost:5432/parking_lot_navigator \
             -user=postgres -password=postgres \
+            -locations=filesystem:/flyway/sql/migration,filesystem:/flyway/sql/seed \
             -validateMigrationNaming=true \
             migrate
 
