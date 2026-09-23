@@ -1,4 +1,4 @@
-package com.all4land.parkinglotnavigator;
+package com.all4land.parkinglotnavigator.monitor;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
