@@ -1,1 +1,0 @@
--- CREATE INDEX IF NOT EXISTS idx_sample_message ON sample(message);
