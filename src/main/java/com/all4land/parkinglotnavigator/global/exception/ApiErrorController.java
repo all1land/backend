@@ -1,8 +1,8 @@
 package com.all4land.parkinglotnavigator.global.exception;
 
+import com.all4land.parkinglotnavigator.global.exception.swagger.ErrorApi;
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
 import com.all4land.parkinglotnavigator.global.response.CommonErrorCode;
-import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 // 스프링 부트 기본 /error 컨트롤러를 대체한다. 서블릿 필터처럼 @RestControllerAdvice가 닿지 않는 곳에서 난 예외도
 // 기본 포맷({"timestamp", "status", ...}) 대신 ApiResponse로 응답하게 한다.
 @Slf4j
-@Hidden
 @RestController
-public class ApiErrorController implements ErrorController {
+public class ApiErrorController implements ErrorController, ErrorApi {
 
+    @Override
     @RequestMapping("/error")
     public ResponseEntity<ApiResponse<Void>> handleError(HttpServletRequest request) {
         CommonErrorCode errorCode = toErrorCode(request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE));
