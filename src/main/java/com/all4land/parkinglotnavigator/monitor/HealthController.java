@@ -1,4 +1,4 @@
-package com.all4land.parkinglotnavigator;
+package com.all4land.parkinglotnavigator.monitor;
 
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
 import com.all4land.parkinglotnavigator.global.response.CommonSuccessCode;
