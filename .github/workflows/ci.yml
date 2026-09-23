@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, dev]
   pull_request:
-    branches: [main, develop]
+    branches: [main, dev]
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:18-alpine
+        image: postgis/postgis:18-3.6-alpine
         env:
           POSTGRES_DB: parking_lot_navigator
           POSTGRES_USER: postgres
