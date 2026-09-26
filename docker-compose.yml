@@ -1,0 +1,37 @@
+services:
+  postgis:
+    image: postgis/postgis:18-3.6-alpine
+    platform: linux/amd64
+    container_name: parking-postgis
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-parking_lot_navigator}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      TZ: Asia/Seoul
+    ports:
+      - "${POSTGIS_PORT:-5433}:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  geoserver:
+    image: kartoza/geoserver:2.24.2
+    container_name: parking-geoserver
+    depends_on:
+      postgis:
+        condition: service_healthy
+    environment:
+      GEOSERVER_ADMIN_USER: ${GEOSERVER_ADMIN_USER:-admin}
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD:-geoserver}
+    ports:
+      - "${GEOSERVER_PORT:-8081}:8080"
+    volumes:
+      - geoserver_data:/opt/geoserver/data_dir
+
+volumes:
+  postgis_data:
+  geoserver_data:
