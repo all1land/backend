@@ -19,7 +19,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
-          - 5432:5432
+          - 5433:5432
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 5s
@@ -50,7 +50,7 @@ jobs:
             -v "$PWD/src/main/resources/db/migration:/flyway/sql/migration" \
             -v "$PWD/src/main/resources/db/seed:/flyway/sql/seed" \
             flyway/flyway:12.4-alpine \
-            -url=jdbc:postgresql://localhost:5432/parking_lot_navigator \
+            -url=jdbc:postgresql://localhost:5433/parking_lot_navigator \
             -user=postgres -password=postgres \
             -locations=filesystem:/flyway/sql/migration,filesystem:/flyway/sql/seed \
             -validateMigrationNaming=true \

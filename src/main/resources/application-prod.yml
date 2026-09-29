@@ -9,3 +9,7 @@ spring:
 logging:
   level:
     root: info
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
