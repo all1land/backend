@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-@WebMvcTest
+// 의존성이 있는 다른 컨트롤러까지 뜨지 않도록 /error 처리용 ApiErrorController만 올린다.
+@WebMvcTest(ApiErrorController.class)
 @Import(GlobalExceptionHandlerTest.ThrowingController.class)
 class GlobalExceptionHandlerTest {
 

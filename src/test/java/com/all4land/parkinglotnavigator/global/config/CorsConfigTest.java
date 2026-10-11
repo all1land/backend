@@ -4,13 +4,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.all4land.parkinglotnavigator.monitor.HealthController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest
+// 의존성이 있는 다른 컨트롤러까지 뜨지 않도록 요청 대상인 HealthController만 올린다.
+@WebMvcTest(HealthController.class)
 class CorsConfigTest {
 
     @Autowired
