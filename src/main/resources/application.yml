@@ -8,6 +8,7 @@ spring:
       connection-init-sql: SET TIME ZONE 'Asia/Seoul'
   flyway:
     locations: classpath:db/migration,classpath:db/seed
+    validate-migration-naming: true
   jpa:
     hibernate:
       ddl-auto: validate
@@ -15,3 +16,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+app:
+  walking-route:
+    # 약 4km/h. Tmap 도보 경로 소요 시간과 비교해 조정
+    walking-speed-mps: ${WALKING_SPEED_MPS:1.1}
+    # 좌표에서 보행 링크까지 이보다 멀면 좌표 오류로 보고 경로를 만들지 않음 (경로 길이 제한이 아님)
+    max-snap-distance-meters: ${MAX_SNAP_DISTANCE_METERS:200}

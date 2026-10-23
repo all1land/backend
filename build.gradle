@@ -27,8 +27,9 @@ dependencies {
 	implementation 'org.flywaydb:flyway-database-postgresql'
 	implementation 'org.hibernate.orm:hibernate-spatial'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
+	// 도보 네트워크 적재 마이그레이션에서 CopyManager(COPY FROM STDIN)를 사용
+	implementation 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
