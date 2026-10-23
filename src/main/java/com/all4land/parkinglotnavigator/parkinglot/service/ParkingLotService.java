@@ -17,11 +17,9 @@ public class ParkingLotService {
     private final ParkingLotRepository parkingLotRepository;
 
     public ParkingLotDetailResponse getParkingLot(Long parkingLotId) {
-        ParkingLot parkingLot = parkingLotRepository.findById(parkingLotId)
-            .orElseThrow(() -> new BusinessException(
-                CommonErrorCode.NOT_FOUND,
-                "주차장 정보를 찾을 수 없습니다."
-            ));
+        ParkingLot parkingLot = parkingLotRepository
+                .findById(parkingLotId)
+                .orElseThrow(() -> new BusinessException(CommonErrorCode.NOT_FOUND, "주차장 정보를 찾을 수 없습니다."));
 
         return ParkingLotDetailResponse.from(parkingLot);
     }

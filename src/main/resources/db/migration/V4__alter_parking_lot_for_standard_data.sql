@@ -1,5 +1,4 @@
 -- 전국주차장정보표준데이터 적재를 위한 tb_parking_lot 보완
--- 팀 설계의 tb_location 분리 구조와 공통코드 구조는 유지합니다.
 
 -- 원본 데이터의 주차장유형(노외/노상/부설)
 ALTER TABLE tb_parking_lot

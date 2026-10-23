@@ -1,24 +1,20 @@
 package com.all4land.parkinglotnavigator.parkinglot.entity;
 
 import com.all4land.parkinglotnavigator.global.entity.BaseEntity;
-import com.all4land.parkinglotnavigator.location.entity.Location;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
+import org.locationtech.jts.geom.Point;
 
 @Getter
 @Entity
@@ -30,9 +26,11 @@ public class ParkingLot extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location_id", nullable = false)
-    private Location location;
+    @Column(name = "location", nullable = false, columnDefinition = "geography(Point,4326)")
+    private Point location;
+
+    @Column(name = "entrance_location", columnDefinition = "geography(Point,4326)")
+    private Point entranceLocation;
 
     @Column(name = "external_id", nullable = false, length = 50)
     private String externalId;

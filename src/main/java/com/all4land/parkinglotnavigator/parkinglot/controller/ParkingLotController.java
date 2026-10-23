@@ -18,15 +18,10 @@ public class ParkingLotController {
     private final ParkingLotService parkingLotService;
 
     @GetMapping("/{parkingLotId}")
-    public ApiResponse<ParkingLotDetailResponse> getParkingLot(
-        @PathVariable("parkingLotId") Long parkingLotId) {
+    public ApiResponse<ParkingLotDetailResponse> getParkingLot(@PathVariable("parkingLotId") Long parkingLotId) {
 
-        ParkingLotDetailResponse response =
-            parkingLotService.getParkingLot(parkingLotId);
+        ParkingLotDetailResponse response = parkingLotService.getParkingLot(parkingLotId);
 
-        return ApiResponse.success(
-            CommonSuccessCode.OK,
-            response
-        );
+        return ApiResponse.success(CommonSuccessCode.OK, response);
     }
 }
