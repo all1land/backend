@@ -1,6 +1,6 @@
 services:
   postgis:
-    image: postgis/postgis:18-3.6-alpine
+    image: pgrouting/pgrouting:18-3.6-4.0.1
     platform: linux/amd64
     container_name: parking-postgis
     environment:
