@@ -23,7 +23,7 @@ CREATE TABLE tb_cmn_code (
         REFERENCES tb_cmn_code(id),
 
     CONSTRAINT uk_cmn_code_parent_code
-        UNIQUE (parent_id, code),
+        UNIQUE NULLS NOT DISTINCT (parent_id, code),
 
     CONSTRAINT ck_cmn_code_state
         CHECK (state IN ('ACTIVE', 'INACTIVE'))
@@ -61,28 +61,6 @@ CREATE TABLE tb_user (
 
 
 -- ============================================================
--- LOCATION
--- 공간정보 공통 테이블
--- ============================================================
-
-CREATE TABLE tb_location (
-    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
-    location            geography(Point, 4326) NOT NULL,
-    entrance_location   geography(Point, 4326),
-
-    created_at          TIMESTAMP NOT NULL DEFAULT LOCALTIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT LOCALTIMESTAMP
-);
-
-CREATE INDEX idx_location_location
-    ON tb_location USING GIST (location);
-
-CREATE INDEX idx_location_entrance_location
-    ON tb_location USING GIST (entrance_location);
-
-
--- ============================================================
 -- PLACE
 -- 일반 목적지 / POI
 -- ============================================================
@@ -90,7 +68,8 @@ CREATE INDEX idx_location_entrance_location
 CREATE TABLE tb_place (
     id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    location_id         BIGINT NOT NULL,
+    location            geography(Point, 4326) NOT NULL,
+    entrance_location   geography(Point, 4326),
 
     name                VARCHAR(255) NOT NULL,
 
@@ -106,13 +85,15 @@ CREATE TABLE tb_place (
     updated_at          TIMESTAMP NOT NULL DEFAULT LOCALTIMESTAMP,
     deleted_at          TIMESTAMP,
 
-    CONSTRAINT fk_place_location
-        FOREIGN KEY (location_id)
-        REFERENCES tb_location(id),
-
     CONSTRAINT uk_place_road_name_address_name
         UNIQUE (road_name_address, name)
 );
+
+CREATE INDEX idx_place_location
+    ON tb_place USING GIST (location);
+
+CREATE INDEX idx_place_entrance_location
+    ON tb_place USING GIST (entrance_location);
 
 CREATE INDEX idx_place_name_trgm
     ON tb_place USING GIN (name gin_trgm_ops);
@@ -128,9 +109,10 @@ CREATE INDEX idx_place_road_name_address_trgm
 CREATE TABLE tb_parking_lot (
     id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    location_id         BIGINT NOT NULL,
+    location            geography(Point, 4326) NOT NULL,
+    entrance_location   geography(Point, 4326),
 
-    external_id         VARCHAR(50)  NOT NULL,
+    external_id        VARCHAR(50)  NOT NULL,
     name                VARCHAR(255) NOT NULL,
 
     -- tb_cmn_code 의 PARKING_CATEGORY 하위 코드
@@ -164,10 +146,6 @@ CREATE TABLE tb_parking_lot (
     updated_at          TIMESTAMP NOT NULL DEFAULT LOCALTIMESTAMP,
     deleted_at          TIMESTAMP,
 
-    CONSTRAINT fk_parking_lot_location
-        FOREIGN KEY (location_id)
-        REFERENCES tb_location(id),
-
     CONSTRAINT uk_parking_lot_external_id
         UNIQUE (external_id),
 
@@ -193,6 +171,12 @@ CREATE TABLE tb_parking_lot (
         CHECK (monthly_pass_fee IS NULL OR monthly_pass_fee >= 0)
 );
 
+CREATE INDEX idx_parking_lot_location
+    ON tb_parking_lot USING GIST (location);
+
+CREATE INDEX idx_parking_lot_entrance_location
+    ON tb_parking_lot USING GIST (entrance_location);
+
 CREATE INDEX idx_parking_lot_name_trgm
     ON tb_parking_lot USING GIN (name gin_trgm_ops);
 
@@ -217,21 +201,14 @@ COMMENT ON COLUMN tb_cmn_code.level
     IS '공통코드 계층 깊이';
 
 
-COMMENT ON TABLE tb_location
-    IS '장소 및 주차장에서 공통으로 사용하는 공간정보';
-
-COMMENT ON COLUMN tb_location.location
-    IS '대표 위치 좌표. 지도 마커 및 반경 검색에 사용';
-
-COMMENT ON COLUMN tb_location.entrance_location
-    IS '실제 경로 안내에 사용할 출입구 좌표';
-
-
 COMMENT ON TABLE tb_place
     IS '일반 목적지 및 POI 정보';
 
-COMMENT ON COLUMN tb_place.location_id
-    IS 'tb_location 참조 ID';
+COMMENT ON COLUMN tb_place.location
+    IS '대표 위치 좌표. 지도 마커 및 반경 검색에 사용';
+
+COMMENT ON COLUMN tb_place.entrance_location
+    IS '실제 경로 안내에 사용할 출입구 좌표';
 
 COMMENT ON COLUMN tb_place.name
     IS '목적지 또는 POI 명';
@@ -246,8 +223,11 @@ COMMENT ON COLUMN tb_place.road_name_address
 COMMENT ON TABLE tb_parking_lot
     IS '주차장 정보';
 
-COMMENT ON COLUMN tb_parking_lot.location_id
-    IS 'tb_location 참조 ID';
+COMMENT ON COLUMN tb_parking_lot.location
+    IS '대표 위치 좌표. 지도 마커 및 반경 검색에 사용';
+
+COMMENT ON COLUMN tb_parking_lot.entrance_location
+    IS '실제 경로 안내에 사용할 출입구 좌표';
 
 COMMENT ON COLUMN tb_parking_lot.external_id
     IS '공공데이터 주차장관리번호. upsert 및 외부 데이터 연동 키';
