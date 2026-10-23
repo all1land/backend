@@ -8,6 +8,7 @@ spring:
       connection-init-sql: SET TIME ZONE 'Asia/Seoul'
   flyway:
     locations: classpath:db/migration,classpath:db/seed
+    validate-migration-naming: true
   jpa:
     hibernate:
       ddl-auto: validate
