@@ -1,13 +1,22 @@
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(1, NULL, 'PLACE_CATEGORY', '장소 분류', 1, 1, NULL, 'ACTIVE', '2026-10-07 14:26:11.469', '2026-10-07 14:26:11.469');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(2, NULL, 'PARKING_CATEGORY', '주차장 분류', 1, 2, NULL, 'ACTIVE', '2026-10-07 14:26:11.469', '2026-10-07 14:26:11.469');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(3, 1, 'RESTAURANT', '음식점', 2, 1, NULL, 'ACTIVE', '2026-10-07 14:26:11.481', '2026-10-07 14:26:11.481');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(4, 1, 'CAFE', '카페', 2, 2, NULL, 'ACTIVE', '2026-10-07 14:26:11.483', '2026-10-07 14:26:11.483');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(5, 1, 'HOSPITAL', '병원', 2, 3, NULL, 'ACTIVE', '2026-10-07 14:26:11.484', '2026-10-07 14:26:11.484');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(6, 1, 'SCHOOL', '학교', 2, 4, NULL, 'ACTIVE', '2026-10-07 14:26:11.486', '2026-10-07 14:26:11.486');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(7, 1, 'ETC', '기타', 2, 99, NULL, 'ACTIVE', '2026-10-07 14:26:11.487', '2026-10-07 14:26:11.487');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(8, 2, 'PUBLIC', '공영', 2, 1, NULL, 'ACTIVE', '2026-10-07 14:26:11.488', '2026-10-07 14:26:11.488');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(9, 2, 'PRIVATE', '민영', 2, 2, NULL, 'ACTIVE', '2026-10-07 14:26:11.490', '2026-10-07 14:26:11.490');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(10, NULL, 'USER_ROLE', '사용자 권한', 1, 3, NULL, 'ACTIVE', '2026-10-07 14:29:28.009', '2026-10-07 14:29:28.009');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(11, 10, 'CLIENT', '일반 사용자', 2, 1, NULL, 'ACTIVE', '2026-10-07 14:29:28.012', '2026-10-07 14:29:28.012');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(12, 10, 'ADMIN', '관리자', 2, 2, NULL, 'ACTIVE', '2026-10-07 14:29:28.014', '2026-10-07 14:29:28.014');
-INSERT INTO public.tb_cmn_code (id, parent_id, code, "name", "level", sort_order, description, state, created_at, updated_at) VALUES(13, 10, 'SUPER_ADMIN', '최고 관리자', 2, 3, NULL, 'ACTIVE', '2026-10-07 14:29:28.015', '2026-10-07 14:29:28.015');
+INSERT INTO tb_cmn_code (parent_id, code, name, level, sort_order) VALUES
+    (NULL, 'PLACE_CATEGORY',   '장소 분류',   1, 1),
+    (NULL, 'PARKING_CATEGORY', '주차장 분류', 1, 2),
+    (NULL, 'USER_ROLE',        '사용자 권한', 1, 3);
+
+INSERT INTO tb_cmn_code (parent_id, code, name, level, sort_order)
+SELECT p.id, c.code, c.name, 2, c.sort_order
+FROM (VALUES
+    ('PLACE_CATEGORY',   'RESTAURANT',  '음식점',      1),
+    ('PLACE_CATEGORY',   'CAFE',        '카페',        2),
+    ('PLACE_CATEGORY',   'HOSPITAL',    '병원',        3),
+    ('PLACE_CATEGORY',   'SCHOOL',      '학교',        4),
+    ('PLACE_CATEGORY',   'ETC',         '기타',        99),
+    ('PARKING_CATEGORY', 'PUBLIC',      '공영',        1),
+    ('PARKING_CATEGORY', 'PRIVATE',     '민영',        2),
+    ('USER_ROLE',        'CLIENT',      '일반 사용자', 1),
+    ('USER_ROLE',        'ADMIN',       '관리자',      2),
+    ('USER_ROLE',        'SUPER_ADMIN', '최고 관리자', 3)
+) AS c(parent_code, code, name, sort_order)
+JOIN tb_cmn_code p
+    ON p.parent_id IS NULL
+   AND p.code = c.parent_code;
