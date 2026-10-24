@@ -1,11 +1,10 @@
 package com.all4land.parkinglotnavigator.parkinglot.repository;
 
 import com.all4land.parkinglotnavigator.parkinglot.entity.ParkingLot;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 public interface ParkingLotRepository extends JpaRepository<ParkingLot, Long> {
     @Query(value = """
@@ -34,11 +33,7 @@ public interface ParkingLotRepository extends JpaRepository<ParkingLot, Long> {
         )
           AND p.deleted_at IS NULL
         ORDER BY distance ASC
-        """,
-        nativeQuery = true)
+        """, nativeQuery = true)
     List<NearbyParkingLotProjection> findNearbyParkingLots(
-        @Param("latitude") Double latitude,
-        @Param("longitude") Double longitude,
-        @Param("radius") Double radius
-    );
+            @Param("latitude") Double latitude, @Param("longitude") Double longitude, @Param("radius") Double radius);
 }

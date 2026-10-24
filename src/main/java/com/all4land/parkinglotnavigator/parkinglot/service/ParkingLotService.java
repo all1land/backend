@@ -7,11 +7,10 @@ import com.all4land.parkinglotnavigator.parkinglot.dto.ParkingLotNearbyResponse;
 import com.all4land.parkinglotnavigator.parkinglot.entity.ParkingLot;
 import com.all4land.parkinglotnavigator.parkinglot.repository.NearbyParkingLotProjection;
 import com.all4land.parkinglotnavigator.parkinglot.repository.ParkingLotRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,28 +27,20 @@ public class ParkingLotService {
         return ParkingLotDetailResponse.from(parkingLot);
     }
 
-    public List<ParkingLotNearbyResponse> getNearbyParkingLots(
-        Double latitude,
-        Double longitude,
-        Double radius) {
+    public List<ParkingLotNearbyResponse> getNearbyParkingLots(Double latitude, Double longitude, Double radius) {
 
         List<NearbyParkingLotProjection> parkingLots =
-            parkingLotRepository.findNearbyParkingLots(
-                latitude,
-                longitude,
-                radius
-            );
+                parkingLotRepository.findNearbyParkingLots(latitude, longitude, radius);
 
         return parkingLots.stream()
-            .map(parkingLot -> new ParkingLotNearbyResponse(
-                parkingLot.getId(),
-                parkingLot.getName(),
-                parkingLot.getRoadNameAddress(),
-                parkingLot.getTotalSpaces(),
-                parkingLot.getLatitude(),
-                parkingLot.getLongitude(),
-                parkingLot.getDistance()
-            ))
-            .toList();
+                .map(parkingLot -> new ParkingLotNearbyResponse(
+                        parkingLot.getId(),
+                        parkingLot.getName(),
+                        parkingLot.getRoadNameAddress(),
+                        parkingLot.getTotalSpaces(),
+                        parkingLot.getLatitude(),
+                        parkingLot.getLongitude(),
+                        parkingLot.getDistance()))
+                .toList();
     }
 }

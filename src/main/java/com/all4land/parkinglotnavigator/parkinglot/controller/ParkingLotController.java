@@ -8,11 +8,10 @@ import com.all4land.parkinglotnavigator.parkinglot.service.ParkingLotService;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Validated
 @RestController
@@ -23,45 +22,21 @@ public class ParkingLotController {
     private final ParkingLotService parkingLotService;
 
     @GetMapping("/{parkingId}")
-    public ApiResponse<ParkingLotDetailResponse> getParkingLot(
-        @PathVariable("parkingId") Long parkingId) {
+    public ApiResponse<ParkingLotDetailResponse> getParkingLot(@PathVariable("parkingId") Long parkingId) {
 
-        ParkingLotDetailResponse response =
-            parkingLotService.getParkingLot(parkingId);
+        ParkingLotDetailResponse response = parkingLotService.getParkingLot(parkingId);
 
-        return ApiResponse.success(
-            CommonSuccessCode.OK,
-            response
-        );
+        return ApiResponse.success(CommonSuccessCode.OK, response);
     }
 
     @GetMapping("/nearby")
     public ApiResponse<List<ParkingLotNearbyResponse>> getNearbyParkingLots(
+            @RequestParam("latitude") @DecimalMin("-90.0") @DecimalMax("90.0") Double latitude,
+            @RequestParam("longitude") @DecimalMin("-180.0") @DecimalMax("180.0") Double longitude,
+            @RequestParam("radius") @Positive Double radius) {
 
-        @RequestParam("latitude")
-        @DecimalMin("-90.0")
-        @DecimalMax("90.0")
-        Double latitude,
+        List<ParkingLotNearbyResponse> response = parkingLotService.getNearbyParkingLots(latitude, longitude, radius);
 
-        @RequestParam("longitude")
-        @DecimalMin("-180.0")
-        @DecimalMax("180.0")
-        Double longitude,
-
-        @RequestParam("radius")
-        @Positive
-        Double radius) {
-
-        List<ParkingLotNearbyResponse> response =
-            parkingLotService.getNearbyParkingLots(
-                latitude,
-                longitude,
-                radius
-            );
-
-        return ApiResponse.success(
-            CommonSuccessCode.OK,
-            response
-        );
+        return ApiResponse.success(CommonSuccessCode.OK, response);
     }
 }
