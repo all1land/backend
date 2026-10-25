@@ -23,3 +23,10 @@ app:
     walking-speed-mps: ${WALKING_SPEED_MPS:1.1}
     # 좌표에서 보행 링크까지 이보다 멀면 좌표 오류로 보고 경로를 만들지 않음 (경로 길이 제한이 아님)
     max-snap-distance-meters: ${MAX_SNAP_DISTANCE_METERS:200}
+  driving-route:
+    # 좌표에서 도로 링크까지 이보다 멀면 좌표 오류로 보고 경로를 만들지 않음 (경로 길이 제한이 아님)
+    max-snap-distance-meters: ${DRIVING_MAX_SNAP_DISTANCE_METERS:200}
+    # 출발지/도착지마다 투영해 볼 가까운 링크 수. 진행 방향이 반대인 링크에 붙어 돌아가는 경로를 피하기 위함
+    snap-candidate-count: ${DRIVING_SNAP_CANDIDATE_COUNT:4}
+    # 접근 구간(좌표 ↔ 도로 투영점)은 걸어서 이동한다고 보고 도보 경로와 같은 속도로 소요 시간을 계산
+    access-walking-speed-mps: ${WALKING_SPEED_MPS:1.1}
