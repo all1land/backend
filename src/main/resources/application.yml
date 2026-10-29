@@ -30,3 +30,7 @@ app:
     snap-candidate-count: ${DRIVING_SNAP_CANDIDATE_COUNT:4}
     # 접근 구간(좌표 ↔ 도로 투영점)은 걸어서 이동한다고 보고 도보 경로와 같은 속도로 소요 시간을 계산
     access-walking-speed-mps: ${WALKING_SPEED_MPS:1.1}
+tmap:
+  base-url: https://apis.openapi.sk.com
+  connect-timeout: 3s
+  read-timeout: 5s
