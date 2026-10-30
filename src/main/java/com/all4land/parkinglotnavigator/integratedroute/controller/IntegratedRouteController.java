@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/routes/integrated")
+@RequestMapping("/api/routes")
 public class IntegratedRouteController {
 
     private final IntegratedRouteService integratedRouteService;
 
-    @PostMapping("/coordinates")
+    @PostMapping("/all")
     public ApiResponse<IntegratedRouteResponse> routeByCoordinates(
             @Valid @RequestBody IntegratedRouteCoordinateRequest request) {
 
