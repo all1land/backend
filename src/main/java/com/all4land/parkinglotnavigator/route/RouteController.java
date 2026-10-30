@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/routes")
+@RequestMapping("/api/routes/tmap")
 @RequiredArgsConstructor
 public class RouteController implements RouteApi {
 

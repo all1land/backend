@@ -66,7 +66,7 @@ try {
   console.log(`Candidates: ${report.candidates.length}`);
 
   for (const parking of report.candidates) {
-    const route = await api('/api/routes/integrated/coordinates', {
+    const route = await api('/api/routes/all', {
       origin: request.origin,
       departurePoi: request.departurePoi,
       parkingId: parking.id,
@@ -104,7 +104,7 @@ try {
   );
 
   const started = performance.now();
-  report.response = await api('/api/routes/integrated/recommendations', request);
+  report.response = await api('/api/routes/recommendations', request);
   report.elapsedMilliseconds = Math.round(performance.now() - started);
 
   assert.equal(report.response.candidateCount, report.candidates.length);

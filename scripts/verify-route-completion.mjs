@@ -111,7 +111,7 @@ async function tmapLeg(mode, start, end) {
     endLat: String(end.latitude),
     endLng: String(end.longitude),
   });
-  const result = await success(`/api/routes/${mode}?${params}`);
+  const result = await success(`/api/routes/tmap/${mode}?${params}`);
   assert.ok(Number.isFinite(result.distanceMeters) && result.distanceMeters >= 0);
   assert.ok(Number.isFinite(result.durationSeconds) && result.durationSeconds >= 0);
   assert.ok(Array.isArray(result.coordinates) && result.coordinates.length >= 2);
@@ -196,7 +196,7 @@ try {
   for (const scenario of scenarios) {
     await record(scenario.name, async () => {
       const request = scenario.request;
-      const route = await success('/api/routes/integrated/coordinates', request);
+      const route = await success('/api/routes/all', request);
       const boundaries = checkRoute(route, request);
 
       assert.ok(route.segments.some(s => s.mode === 'DRIVING'));
@@ -242,7 +242,7 @@ try {
         ...baseRequest,
         [side]: { latitude: 37.4979, longitude: 127.0276 },
       };
-      const response = await api('/api/routes/integrated/coordinates', request);
+      const response = await api('/api/routes/all', request);
       assert.equal(response.status, 400);
       assert.equal(response.json.success, false);
       assert.equal(response.json.code, 'WALKING_ROUTE_400_001');
@@ -275,7 +275,7 @@ try {
         parkingId: candidate.id,
         destination: request.destination,
       };
-      const route = await success('/api/routes/integrated/coordinates', routeRequest);
+      const route = await success('/api/routes/all', routeRequest);
       checkRoute(route, routeRequest);
       expected.push({
         parkingId: candidate.id,
@@ -291,7 +291,7 @@ try {
     );
 
     const started = performance.now();
-    const response = await success('/api/routes/integrated/recommendations', request);
+    const response = await success('/api/routes/recommendations', request);
     const elapsedMilliseconds = Math.round(performance.now() - started);
 
     assert.equal(response.candidateCount, candidates.length);

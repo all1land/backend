@@ -29,7 +29,7 @@ class RouteControllerTest {
         given(routeService.driving(any()))
                 .willReturn(new RouteResponse(1520, 420, List.of(new double[] {126.8495, 37.5509})));
 
-        mockMvc.perform(get("/api/routes/driving")
+        mockMvc.perform(get("/api/routes/tmap/driving")
                         .param("startLat", "37.5509")
                         .param("startLng", "126.8495")
                         .param("endLat", "37.5583")
@@ -43,7 +43,7 @@ class RouteControllerTest {
 
     @Test
     void missingCoordinateIsValidationError() throws Exception {
-        mockMvc.perform(get("/api/routes/walking")
+        mockMvc.perform(get("/api/routes/tmap/walking")
                         .param("startLat", "37.5509")
                         .param("startLng", "126.8495")
                         .param("endLat", "37.5583"))
@@ -53,7 +53,7 @@ class RouteControllerTest {
 
     @Test
     void outOfRangeLatitudeIsValidationError() throws Exception {
-        mockMvc.perform(get("/api/routes/driving")
+        mockMvc.perform(get("/api/routes/tmap/driving")
                         .param("startLat", "137.5")
                         .param("startLng", "126.8495")
                         .param("endLat", "37.5583")
@@ -66,7 +66,7 @@ class RouteControllerTest {
     void tmapFailureIsBadGateway() throws Exception {
         given(routeService.driving(any())).willThrow(new BusinessException(RouteErrorCode.ROUTE_API_FAILED));
 
-        mockMvc.perform(get("/api/routes/driving")
+        mockMvc.perform(get("/api/routes/tmap/driving")
                         .param("startLat", "37.5509")
                         .param("startLng", "126.8495")
                         .param("endLat", "37.5583")

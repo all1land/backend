@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/routes/integrated")
+@RequestMapping("/api/routes")
 public class ParkingRecommendationController {
 
     private final ParkingRecommendationService recommendationService;

@@ -90,7 +90,7 @@ function Get-TmapLeg {
     $endLat = ([double]$End.latitude).ToString("R", $culture)
     $endLng = ([double]$End.longitude).ToString("R", $culture)
 
-    $path = "/api/routes/${Mode}?startLat=$startLat&startLng=$startLng&endLat=$endLat&endLng=$endLng"
+    $path = "/api/routes/tmap/${Mode}?startLat=$startLat&startLng=$startLng&endLat=$endLat&endLng=$endLng"
     $response = Invoke-RouteApi -Path $path
 
     if (
@@ -145,7 +145,7 @@ $parkingCoordinate = @{
 }
 
 $integrated = Invoke-RouteApi `
-    -Path "/api/routes/integrated/coordinates" `
+    -Path "/api/routes/all" `
     -Body $request
 
 $segments = @($integrated.data.segments)

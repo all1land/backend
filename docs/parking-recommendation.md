@@ -1,7 +1,7 @@
 # 좌표 기반 주차장 추천
 
 ## API
-POST /api/routes/integrated/recommendations
+POST /api/routes/recommendations
 Content-Type: application/json
 
 ## 요청
@@ -28,7 +28,7 @@ Content-Type: application/json
 
 ## 경로 표시
 선택한 recommendations 항목의 parkingId를 기존 통합 경로 API에 전달한다.
-POST /api/routes/integrated/coordinates
+POST /api/routes/all
 
 ## 오류
 - 좌표 및 반경/limit 검증: COMMON_400_002

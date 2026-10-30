@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ParkingRecommendationController.class)
 class ParkingRecommendationControllerTest {
 
-    private static final String URL = "/api/routes/integrated/recommendations";
+    private static final String URL = "/api/routes/recommendations";
     private static final String REQUEST = """
             {
               "origin":{"latitude":37.5586,"longitude":126.8377},
