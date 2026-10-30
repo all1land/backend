@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(IntegratedRouteController.class)
 class IntegratedRouteControllerTest {
 
-    private static final String URL = "/api/routes/integrated/coordinates";
+    private static final String URL = "/api/routes/all";
 
     private static final String REQUEST = """
             {
