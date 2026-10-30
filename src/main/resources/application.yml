@@ -17,6 +17,9 @@ spring:
       hibernate:
         format_sql: true
 
+tmap:
+  app-key: ${TMAP_APP_KEY:}
+
 app:
   walking-route:
     # 약 4km/h. Tmap 도보 경로 소요 시간과 비교해 조정
