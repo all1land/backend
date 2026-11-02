@@ -3,7 +3,6 @@ package com.all4land.parkinglotnavigator.parkinglot.repository;
 import com.all4land.parkinglotnavigator.parkinglot.entity.ParkingLot;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -132,8 +131,6 @@ public interface ParkingLotRepository extends JpaRepository<ParkingLot, Long> {
 
         WHERE p.id = :parkingId
           AND p.deleted_at IS NULL
-        """,
-        nativeQuery = true)
-    Optional<ParkingLotDetailProjection> findParkingLotDetail(
-        @Param("parkingId") Long parkingId);
+        """, nativeQuery = true)
+    Optional<ParkingLotDetailProjection> findParkingLotDetail(@Param("parkingId") Long parkingId);
 }
