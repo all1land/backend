@@ -1,6 +1,7 @@
 package com.all4land.parkinglotnavigator.parkinglot.repository;
 
 public interface NearbyParkingLotProjection {
+
     Long getId();
 
     String getName();
@@ -13,7 +14,11 @@ public interface NearbyParkingLotProjection {
 
     String getCategoryCode();
 
+    String getCategoryName();
+
     String getParkingTypeCode();
+
+    String getParkingTypeName();
 
     Integer getTotalSpaces();
 

@@ -11,4 +11,6 @@ public record ParkingLotNearbyResponse(
         String phone,
         String lotNumberAddress,
         String categoryCode,
-        String parkingTypeCode) {}
+        String categoryName,
+        String parkingTypeCode,
+        String parkingTypeName) {}

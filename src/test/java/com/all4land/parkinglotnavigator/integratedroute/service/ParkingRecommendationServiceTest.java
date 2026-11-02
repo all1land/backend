@@ -35,7 +35,7 @@ class ParkingRecommendationServiceTest {
 
     private ParkingLotNearbyResponse candidate(long id) {
         return new ParkingLotNearbyResponse(
-                id, "parking-" + id, null, 10, 37.5667867, 126.8177876, 100.0, null, null, null, null);
+                id, "parking-" + id, null, 10, 37.5667867, 126.8177876, 100.0, null, null, null, null, null, null);
     }
 
     private void candidates(List<ParkingLotNearbyResponse> values) {
