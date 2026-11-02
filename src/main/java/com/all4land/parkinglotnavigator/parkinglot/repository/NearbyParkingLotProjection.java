@@ -7,6 +7,14 @@ public interface NearbyParkingLotProjection {
 
     String getRoadNameAddress();
 
+    String getPhone();
+
+    String getLotNumberAddress();
+
+    String getCategoryCode();
+
+    String getParkingTypeCode();
+
     Integer getTotalSpaces();
 
     Double getLatitude();

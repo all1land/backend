@@ -7,4 +7,8 @@ public record ParkingLotNearbyResponse(
         Integer totalSpaces,
         Double latitude,
         Double longitude,
-        Double distanceMeters) {}
+        Double distanceMeters,
+        String phone,
+        String lotNumberAddress,
+        String categoryCode,
+        String parkingTypeCode) {}

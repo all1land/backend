@@ -40,7 +40,11 @@ public class ParkingLotService {
                         parkingLot.getTotalSpaces(),
                         parkingLot.getLatitude(),
                         parkingLot.getLongitude(),
-                        parkingLot.getDistance()))
+                        parkingLot.getDistance(),
+                        parkingLot.getPhone(),
+                        parkingLot.getLotNumberAddress(),
+                        parkingLot.getCategoryCode(),
+                        parkingLot.getParkingTypeCode()))
                 .toList();
     }
 }
