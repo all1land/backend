@@ -1,13 +1,15 @@
 package com.all4land.parkinglotnavigator.parkinglot.dto;
 
-import com.all4land.parkinglotnavigator.parkinglot.entity.ParkingLot;
+import com.all4land.parkinglotnavigator.parkinglot.repository.ParkingLotDetailProjection;
 import java.time.LocalTime;
 
 public record ParkingLotDetailResponse(
         Long id,
         String name,
         String categoryCode,
+        String categoryName,
         String parkingTypeCode,
+        String parkingTypeName,
         String roadNameAddress,
         String lotNumberAddress,
         String phone,
@@ -34,12 +36,15 @@ public record ParkingLotDetailResponse(
         Double latitude,
         Double longitude) {
 
-    public static ParkingLotDetailResponse from(ParkingLot parkingLot) {
+    public static ParkingLotDetailResponse from(ParkingLotDetailProjection parkingLot) {
+
         return new ParkingLotDetailResponse(
                 parkingLot.getId(),
                 parkingLot.getName(),
                 parkingLot.getCategoryCode(),
+                parkingLot.getCategoryName(),
                 parkingLot.getParkingTypeCode(),
+                parkingLot.getParkingTypeName(),
                 parkingLot.getRoadNameAddress(),
                 parkingLot.getLotNumberAddress(),
                 parkingLot.getPhone(),
@@ -63,7 +68,7 @@ public record ParkingLotDetailResponse(
                 parkingLot.getSpecialNotes(),
                 parkingLot.getManagementAgency(),
                 parkingLot.getDisabledParkingYn(),
-                parkingLot.getLocation().getY(),
-                parkingLot.getLocation().getX());
+                parkingLot.getLatitude(),
+                parkingLot.getLongitude());
     }
 }
