@@ -13,7 +13,7 @@ class IntegratedRouteAssemblerDrivingTest {
     private final IntegratedRouteAssembler assembler = new IntegratedRouteAssembler();
 
     @Test
-    void marksAccessSegmentsAsWalkingAndKeepsGeometry() {
+    void marksDepartureAccessAsWalkingAndParkingAccessAsDriving() {
         List<double[]> roadCoordinates = List.of(
                 new double[] {126.8171, 37.5661}, new double[] {126.8175, 37.5664}, new double[] {126.8180, 37.5668});
 
@@ -23,7 +23,7 @@ class IntegratedRouteAssemblerDrivingTest {
                 drivingSegment(20, 18, new double[] {126.8180, 37.5668}, new double[] {126.8181, 37.5669})));
 
         assertEquals(
-                List.of(TravelMode.WALKING, TravelMode.DRIVING, TravelMode.WALKING),
+                List.of(TravelMode.WALKING, TravelMode.DRIVING, TravelMode.DRIVING),
                 converted.stream().map(segment -> segment.mode()).toList());
 
         assertEquals(
@@ -54,7 +54,7 @@ class IntegratedRouteAssemblerDrivingTest {
 
         assertEquals(3, converted.size());
         assertEquals(TravelMode.WALKING, converted.getFirst().mode());
-        assertEquals(TravelMode.WALKING, converted.getLast().mode());
+        assertEquals(TravelMode.DRIVING, converted.getLast().mode());
         assertEquals(0, converted.getFirst().distanceMeters());
         assertEquals(0, converted.getLast().durationSeconds());
     }
@@ -65,13 +65,15 @@ class IntegratedRouteAssemblerDrivingTest {
     }
 
     @Test
-    void acceptsTwoAccessSegmentsWithoutRoadTravel() {
+    void marksParkingArrivalAsDrivingWithoutRoadTravel() {
         var converted = assembler.driving(List.of(
                 drivingSegment(10, 9, new double[] {126.8170, 37.5660}, new double[] {126.8171, 37.5661}),
                 drivingSegment(20, 18, new double[] {126.8171, 37.5661}, new double[] {126.8172, 37.5662})));
 
         assertEquals(2, converted.size());
-        assertTrue(converted.stream().allMatch(segment -> segment.mode() == TravelMode.WALKING));
+        assertEquals(
+                List.of(TravelMode.WALKING, TravelMode.DRIVING),
+                converted.stream().map(segment -> segment.mode()).toList());
     }
 
     @Test
@@ -114,9 +116,14 @@ class IntegratedRouteAssemblerDrivingTest {
                         TravelMode.WALKING,
                         TravelMode.WALKING,
                         TravelMode.DRIVING,
-                        TravelMode.WALKING,
+                        TravelMode.DRIVING,
                         TravelMode.WALKING),
                 response.segments().stream().map(segment -> segment.mode()).toList());
+
+        assertEquals(TravelMode.DRIVING, response.segments().get(3).mode());
+        assertArrayEquals(parking, response.segments().get(3).coordinates().getLast(), 0.0);
+        assertEquals(TravelMode.WALKING, response.segments().get(4).mode());
+        assertArrayEquals(parking, response.segments().get(4).coordinates().getFirst(), 0.0);
 
         assertArrayEquals(origin, response.segments().getFirst().coordinates().getFirst(), 0.0);
         assertArrayEquals(
