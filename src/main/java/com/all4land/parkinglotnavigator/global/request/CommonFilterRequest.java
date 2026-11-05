@@ -8,9 +8,9 @@ import lombok.Getter;
 public class CommonFilterRequest extends CommonPaginationRequest {
 
     @Schema(description = "검색어", example = "마곡")
-    private String filterKeyword = "";
+    private String keyword = "";
 
-    public void setFilterKeyword(String filterKeyword) {
-        this.filterKeyword = filterKeyword == null ? "" : filterKeyword.strip();
+    public void setFilterKeyword(String keyword) {
+        this.keyword = keyword == null ? "" : keyword.strip();
     }
 }
