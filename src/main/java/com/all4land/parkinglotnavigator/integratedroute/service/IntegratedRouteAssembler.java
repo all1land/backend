@@ -25,7 +25,8 @@ public class IntegratedRouteAssembler {
 
     /**
      * 차량 서비스 결과를 통합 구간으로 변환한다.
-     * 첫 구간과 마지막 구간은 도보 접근 구간이며, 중간 구간은 차량 주행 구간이다.
+     * 첫 구간은 출발지에서 도로까지의 도보 접근 구간이다.
+     * 중간 차량 경로와 마지막 도로에서 주차장 마커까지의 접근 구간은 차량 구간으로 반환한다.
      * 출발지와 도착지가 같은 경우 반환되는 빈 목록은 그대로 허용한다.
      */
     public List<IntegratedRouteSegment> driving(List<DrivingRouteSegment> segments) {
@@ -37,11 +38,11 @@ public class IntegratedRouteAssembler {
 
         for (int index = 0; index < segments.size(); index++) {
             DrivingRouteSegment segment = segments.get(index);
-            boolean accessSegment = index == 0 || index == segments.size() - 1;
+            boolean departureAccessSegment = index == 0;
 
             result.add(new IntegratedRouteSegment(
                     0,
-                    accessSegment ? TravelMode.WALKING : TravelMode.DRIVING,
+                    departureAccessSegment ? TravelMode.WALKING : TravelMode.DRIVING,
                     segment.distanceMeters(),
                     segment.durationSeconds(),
                     segment.coordinates()));
