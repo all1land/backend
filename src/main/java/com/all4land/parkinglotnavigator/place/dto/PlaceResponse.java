@@ -4,8 +4,11 @@ package com.all4land.parkinglotnavigator.place.dto;
 public record PlaceResponse(
         String poiId,
         String name,
+        String categoryCode,
         String roadNameAddress,
         String lotNumberAddress,
+        String zipCode,
+        String phone,
         double latitude,
         double longitude,
         Double entranceLatitude,
