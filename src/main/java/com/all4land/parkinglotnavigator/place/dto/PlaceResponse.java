@@ -12,5 +12,4 @@ public record PlaceResponse(
         double latitude,
         double longitude,
         Double entranceLatitude,
-        Double entranceLongitude
-) {}
+        Double entranceLongitude) {}
