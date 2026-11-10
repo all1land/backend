@@ -25,7 +25,13 @@ public class PlaceRepository {
             """;
 
     private static final String LIST_SQL = """
-            SELECT p.id, p.name, p.road_name_address, p.lot_number_address,
+             SELECT p.id::text AS poi_id,
+                     p.name,
+                     p.category_code,
+                     p.road_name_address,
+                     p.lot_number_address,
+                     p.zip_code,
+                     p.phone,
                    ST_Y(p.location::geometry) AS latitude,
                    ST_X(p.location::geometry) AS longitude,
                    ST_Y(p.entrance_location::geometry) AS entrance_latitude,
@@ -46,10 +52,13 @@ public class PlaceRepository {
                 LIST_SQL,
                 parameters,
                 (rs, rowNum) -> new PlaceResponse(
-                        rs.getLong("id"),
+                        rs.getString("poi_id"),
                         rs.getString("name"),
+                        rs.getString("category_code"),
                         rs.getString("road_name_address"),
                         rs.getString("lot_number_address"),
+                        rs.getString("zip_code"),
+                        rs.getString("phone"),
                         rs.getDouble("latitude"),
                         rs.getDouble("longitude"),
                         rs.getObject("entrance_latitude", Double.class),
