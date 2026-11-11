@@ -1,6 +1,7 @@
 package com.all4land.parkinglotnavigator.domain.parkinglot.dto;
 
 import com.all4land.parkinglotnavigator.domain.parkinglot.repository.ParkingLotDetailProjection;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record ParkingLotDetailResDTO(
@@ -34,7 +35,15 @@ public record ParkingLotDetailResDTO(
         String managementAgency,
         String disabledParkingYn,
         Double latitude,
-        Double longitude) {
+        Double longitude,
+
+        String externalId,
+        String displayAddress,
+        LocalDate dataReferenceDate,
+        String providerCode,
+        String providerName,
+        Double entranceLatitude,
+        Double entranceLongitude) {
 
     public static ParkingLotDetailResDTO from(ParkingLotDetailProjection parkingLot) {
 
@@ -69,6 +78,13 @@ public record ParkingLotDetailResDTO(
                 parkingLot.getManagementAgency(),
                 parkingLot.getDisabledParkingYn(),
                 parkingLot.getLatitude(),
-                parkingLot.getLongitude());
+                parkingLot.getLongitude(),
+                parkingLot.getExternalId(),
+                parkingLot.getDisplayAddress(),
+                parkingLot.getDataReferenceDate(),
+                parkingLot.getProviderCode(),
+                parkingLot.getProviderName(),
+                parkingLot.getEntranceLatitude(),
+                parkingLot.getEntranceLongitude());
     }
 }

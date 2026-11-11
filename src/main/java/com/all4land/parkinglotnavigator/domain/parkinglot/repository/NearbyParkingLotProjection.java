@@ -1,5 +1,8 @@
 package com.all4land.parkinglotnavigator.domain.parkinglot.repository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 public interface NearbyParkingLotProjection {
 
     Long getId();
@@ -27,4 +30,56 @@ public interface NearbyParkingLotProjection {
     Double getLongitude();
 
     Double getDistance();
+
+    String getExternalId();
+
+    String getDisplayAddress();
+
+    String getOperationDays();
+
+    LocalTime getWeekdayOpen();
+
+    LocalTime getWeekdayClose();
+
+    LocalTime getSaturdayOpen();
+
+    LocalTime getSaturdayClose();
+
+    LocalTime getHolidayOpen();
+
+    LocalTime getHolidayClose();
+
+    String getFeeInfo();
+
+    Integer getBaseMinutes();
+
+    Integer getBaseFee();
+
+    Integer getExtraUnitMinutes();
+
+    Integer getExtraUnitFee();
+
+    Integer getDailyTicketHours();
+
+    Integer getDailyTicketFee();
+
+    Integer getMonthlyPassFee();
+
+    String getPaymentMethod();
+
+    String getSpecialNotes();
+
+    String getManagementAgency();
+
+    String getDisabledParkingYn();
+
+    LocalDate getDataReferenceDate();
+
+    String getProviderCode();
+
+    String getProviderName();
+
+    Double getEntranceLatitude();
+
+    Double getEntranceLongitude();
 }
