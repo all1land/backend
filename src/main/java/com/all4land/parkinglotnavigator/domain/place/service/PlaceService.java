@@ -4,9 +4,9 @@ import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListRequest;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResponse;
 import com.all4land.parkinglotnavigator.domain.place.repository.PlaceRepository;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
-import com.all4land.parkinglotnavigator.global.response.CommonErrorCode;
-import com.all4land.parkinglotnavigator.global.response.CommonFilter;
-import com.all4land.parkinglotnavigator.global.response.CommonListResponse;
+import com.all4land.parkinglotnavigator.global.response.CmmFilter;
+import com.all4land.parkinglotnavigator.global.response.CmmListResponse;
+import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import jakarta.validation.Validator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,17 +24,17 @@ public class PlaceService {
     private final Validator validator;
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
-    public CommonListResponse<PlaceResponse> getPlaces(PlaceListRequest request) {
+    public CmmListResponse<PlaceResponse> getPlaces(PlaceListRequest request) {
         if (request == null || !validator.validate(request).isEmpty()) {
-            throw new BusinessException(CommonErrorCode.VALIDATION_ERROR, "장소 조회 영역과 검색 조건을 확인해주세요.");
+            throw new BusinessException(EnCmmErrCode.VALIDATION_ERROR, "장소 조회 영역과 검색 조건을 확인해주세요.");
         }
         long total = placeRepository.countInBounds(request);
         List<PlaceResponse> items = total == 0 ? List.of() : placeRepository.findInBounds(request);
-        return CommonListResponse.fromPage(
+        return CmmListResponse.fromPage(
                 items, total, request.getPageIndex(), request.getPageSize(), appliedFilter(request));
     }
 
-    private CommonFilter appliedFilter(PlaceListRequest request) {
+    private CmmFilter appliedFilter(PlaceListRequest request) {
         Map<String, Object> values = new LinkedHashMap<>();
         values.put("keyword", request.getKeyword());
         values.put("minLat", request.getMinLat());
@@ -46,6 +46,6 @@ public class PlaceService {
         if (request.getZoom() != null) {
             values.put("zoom", request.getZoom());
         }
-        return new CommonFilter(values);
+        return new CmmFilter(values);
     }
 }

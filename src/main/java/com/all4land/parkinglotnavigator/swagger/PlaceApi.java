@@ -1,9 +1,9 @@
-package com.all4land.parkinglotnavigator.domain.place.swagger;
+package com.all4land.parkinglotnavigator.swagger;
 
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListRequest;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResponse;
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
-import com.all4land.parkinglotnavigator.global.response.CommonListResponse;
+import com.all4land.parkinglotnavigator.global.response.CmmListResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -70,5 +70,5 @@ public interface PlaceApi {
                 content =
                         @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
     })
-    ApiResponse<CommonListResponse<PlaceResponse>> getPlaces(@ParameterObject PlaceListRequest request);
+    ApiResponse<CmmListResponse<PlaceResponse>> getPlaces(@ParameterObject PlaceListRequest request);
 }

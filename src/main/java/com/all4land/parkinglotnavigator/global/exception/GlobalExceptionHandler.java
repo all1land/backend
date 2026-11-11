@@ -2,7 +2,7 @@ package com.all4land.parkinglotnavigator.global.exception;
 
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
 import com.all4land.parkinglotnavigator.global.response.BaseErrorCode;
-import com.all4land.parkinglotnavigator.global.response.CommonErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
         List<String> detail = ex.getBindingResult().getFieldErrors().stream()
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .toList();
-        return toResponse(CommonErrorCode.VALIDATION_ERROR, detail);
+        return toResponse(EnCmmErrCode.VALIDATION_ERROR, detail);
     }
 
     // 컨트롤러 메서드 파라미터(@RequestParam, @PathVariable 등)에 붙은 제약 조건 위반
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
         List<String> detail = ex.getAllErrors().stream()
                 .map(MessageSourceResolvable::getDefaultMessage)
                 .toList();
-        return toResponse(CommonErrorCode.VALIDATION_ERROR, detail);
+        return toResponse(EnCmmErrCode.VALIDATION_ERROR, detail);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -54,56 +54,56 @@ public class GlobalExceptionHandler {
         List<String> detail = ex.getConstraintViolations().stream()
                 .map(v -> v.getPropertyPath() + ": " + v.getMessage())
                 .toList();
-        return toResponse(CommonErrorCode.VALIDATION_ERROR, detail);
+        return toResponse(EnCmmErrCode.VALIDATION_ERROR, detail);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        return toResponse(CommonErrorCode.VALIDATION_ERROR, List.of(ex.getName() + ": 타입이 올바르지 않습니다."));
+        return toResponse(EnCmmErrCode.VALIDATION_ERROR, List.of(ex.getName() + ": 타입이 올바르지 않습니다."));
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse<Void>> handleMissingParam(MissingServletRequestParameterException ex) {
-        return toResponse(CommonErrorCode.VALIDATION_ERROR, List.of(ex.getParameterName() + ": 필수 파라미터가 누락되었습니다."));
+        return toResponse(EnCmmErrCode.VALIDATION_ERROR, List.of(ex.getParameterName() + ": 필수 파라미터가 누락되었습니다."));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotReadable(HttpMessageNotReadableException ex) {
         log.debug("[HttpMessageNotReadable]", ex);
-        return toResponse(CommonErrorCode.BAD_REQUEST, List.of("요청 본문(JSON)을 올바르게 작성해 주세요."));
+        return toResponse(EnCmmErrCode.BAD_REQUEST, List.of("요청 본문(JSON)을 올바르게 작성해 주세요."));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
-        return toResponse(CommonErrorCode.METHOD_NOT_ALLOWED, List.of());
+        return toResponse(EnCmmErrCode.METHOD_NOT_ALLOWED, List.of());
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ApiResponse<Void>> handleMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex) {
-        return toResponse(CommonErrorCode.UNSUPPORTED_MEDIA_TYPE, List.of());
+        return toResponse(EnCmmErrCode.UNSUPPORTED_MEDIA_TYPE, List.of());
     }
 
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
     public ResponseEntity<ApiResponse<Void>> handleMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex) {
-        return toResponse(CommonErrorCode.NOT_ACCEPTABLE, List.of());
+        return toResponse(EnCmmErrCode.NOT_ACCEPTABLE, List.of());
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(NoResourceFoundException ex) {
-        return toResponse(CommonErrorCode.NOT_FOUND, List.of());
+        return toResponse(EnCmmErrCode.NOT_FOUND, List.of());
     }
 
     // 라이브러리가 던진 예외일 수 있어 메시지에 내부 정보가 섞일 수 있다. 상세 내용은 로그로만 남긴다.
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException ex) {
         log.warn("[IllegalStateException]", ex);
-        return toResponse(CommonErrorCode.CONFLICT, List.of());
+        return toResponse(EnCmmErrCode.CONFLICT, List.of());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnexpected(Exception ex) {
         log.error("Unhandled exception", ex);
-        return toResponse(CommonErrorCode.INTERNAL_SERVER_ERROR, List.of());
+        return toResponse(EnCmmErrCode.INTERNAL_SERVER_ERROR, List.of());
     }
 
     // Content-Type을 JSON으로 고정한다. 요청의 Accept가 JSON이 아니면(예: application/xml) 에러 응답을 쓰는

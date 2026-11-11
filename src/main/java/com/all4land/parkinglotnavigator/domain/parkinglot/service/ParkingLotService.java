@@ -6,7 +6,7 @@ import com.all4land.parkinglotnavigator.domain.parkinglot.repository.NearbyParki
 import com.all4land.parkinglotnavigator.domain.parkinglot.repository.ParkingLotDetailProjection;
 import com.all4land.parkinglotnavigator.domain.parkinglot.repository.ParkingLotRepository;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
-import com.all4land.parkinglotnavigator.global.response.CommonErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class ParkingLotService {
     public ParkingLotDetailResponse getParkingLot(Long parkingLotId) {
         ParkingLotDetailProjection parkingLot = parkingLotRepository
                 .findParkingLotDetail(parkingLotId)
-                .orElseThrow(() -> new BusinessException(CommonErrorCode.NOT_FOUND, "주차장 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(EnCmmErrCode.NOT_FOUND, "주차장 정보를 찾을 수 없습니다."));
 
         return ParkingLotDetailResponse.from(parkingLot);
     }

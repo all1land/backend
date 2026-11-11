@@ -4,7 +4,7 @@ import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationRe
 import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationResponse;
 import com.all4land.parkinglotnavigator.domain.route.service.ParkingRecommendationService;
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
-import com.all4land.parkinglotnavigator.global.response.CommonSuccessCode;
+import com.all4land.parkinglotnavigator.global.response.EnCmmScssCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +22,6 @@ public class ParkingRecommendationController {
     @PostMapping("/recommendations")
     public ApiResponse<ParkingRecommendationResponse> recommend(
             @Valid @RequestBody ParkingRecommendationRequest request) {
-        return ApiResponse.success(CommonSuccessCode.OK, recommendationService.recommend(request));
+        return ApiResponse.success(EnCmmScssCode.OK, recommendationService.recommend(request));
     }
 }

@@ -11,15 +11,15 @@ import java.util.Objects;
         description = "도메인별 적용 검색 조건을 담는 JSON 객체",
         type = "object",
         additionalProperties = Schema.AdditionalPropertiesValue.TRUE)
-public record CommonFilter(@JsonValue Map<String, Object> values) {
+public record CmmFilter(@JsonValue Map<String, Object> values) {
 
-    public CommonFilter {
-        Objects.requireNonNull(values, "CommonFilter values must not be null");
-        values.keySet().forEach(key -> Objects.requireNonNull(key, "CommonFilter keys must not be null"));
+    public CmmFilter {
+        Objects.requireNonNull(values, "CmmFilter values must not be null");
+        values.keySet().forEach(key -> Objects.requireNonNull(key, "CmmFilter keys must not be null"));
         values = Collections.unmodifiableMap(new LinkedHashMap<>(values));
     }
 
-    public static CommonFilter empty() {
-        return new CommonFilter(Map.of());
+    public static CmmFilter empty() {
+        return new CmmFilter(Map.of());
     }
 }

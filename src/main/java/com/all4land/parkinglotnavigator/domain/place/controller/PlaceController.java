@@ -3,10 +3,10 @@ package com.all4land.parkinglotnavigator.domain.place.controller;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListRequest;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResponse;
 import com.all4land.parkinglotnavigator.domain.place.service.PlaceService;
-import com.all4land.parkinglotnavigator.domain.place.swagger.PlaceApi;
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
-import com.all4land.parkinglotnavigator.global.response.CommonListResponse;
-import com.all4land.parkinglotnavigator.global.response.CommonSuccessCode;
+import com.all4land.parkinglotnavigator.global.response.CmmListResponse;
+import com.all4land.parkinglotnavigator.global.response.EnCmmScssCode;
+import com.all4land.parkinglotnavigator.swagger.PlaceApi;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -24,9 +24,9 @@ public class PlaceController implements PlaceApi {
 
     @Override
     @GetMapping("/list")
-    public ApiResponse<CommonListResponse<PlaceResponse>> getPlaces(
+    public ApiResponse<CmmListResponse<PlaceResponse>> getPlaces(
             @Valid @ModelAttribute @ParameterObject PlaceListRequest request) {
-        CommonListResponse<PlaceResponse> response = placeService.getPlaces(request);
-        return ApiResponse.success(CommonSuccessCode.OK, response);
+        CmmListResponse<PlaceResponse> response = placeService.getPlaces(request);
+        return ApiResponse.success(EnCmmScssCode.OK, response);
     }
 }

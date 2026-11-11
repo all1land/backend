@@ -13,7 +13,7 @@ import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationRe
 import com.all4land.parkinglotnavigator.domain.route.dto.RouteCoordinate;
 import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
-import com.all4land.parkinglotnavigator.global.response.CommonErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import java.util.List;
 import java.util.stream.LongStream;
 import org.junit.jupiter.api.Test;
@@ -84,7 +84,7 @@ class ParkingRecommendationServiceTest {
 
         assertThatThrownBy(() -> service.recommend(request(3)))
                 .isInstanceOfSatisfying(BusinessException.class, e -> assertThat(e.getErrorCode())
-                        .isEqualTo(CommonErrorCode.BAD_REQUEST));
+                        .isEqualTo(EnCmmErrCode.BAD_REQUEST));
 
         verifyNoInteractions(routes);
     }

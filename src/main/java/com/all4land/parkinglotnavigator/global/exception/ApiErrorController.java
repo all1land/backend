@@ -1,7 +1,7 @@
 package com.all4land.parkinglotnavigator.global.exception;
 
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
-import com.all4land.parkinglotnavigator.global.response.CommonErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import com.all4land.parkinglotnavigator.swagger.ErrorApi;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ public class ApiErrorController implements ErrorController, ErrorApi {
     @Override
     @RequestMapping("/error")
     public ResponseEntity<ApiResponse<Void>> handleError(HttpServletRequest request) {
-        CommonErrorCode errorCode = toErrorCode(request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE));
+        EnCmmErrCode errorCode = toErrorCode(request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE));
         Object exception = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
         log.warn(
                 "[ErrorDispatch] status={}, path={}, exception={}",
@@ -32,13 +32,13 @@ public class ApiErrorController implements ErrorController, ErrorApi {
         return GlobalExceptionHandler.toResponse(errorCode, List.of());
     }
 
-    // CommonErrorCode에 없는 상태(401, 403, 413, 503 등)는 500으로 바꿔 응답 상태와 본문 코드를 일치시킨다.
-    // 원래 상태를 살려야 하는 경우가 생기면 CommonErrorCode에 해당 코드를 추가한다.
-    private CommonErrorCode toErrorCode(Object statusCode) {
-        return Arrays.stream(CommonErrorCode.values())
+    // EnCmmErrCode에 없는 상태(401, 403, 413, 503 등)는 500으로 바꿔 응답 상태와 본문 코드를 일치시킨다.
+    // 원래 상태를 살려야 하는 경우가 생기면 EnCmmErrCode에 해당 코드를 추가한다.
+    private EnCmmErrCode toErrorCode(Object statusCode) {
+        return Arrays.stream(EnCmmErrCode.values())
                 .filter(code -> statusCode instanceof Integer status
                         && code.getHttpStatus().value() == status)
                 .findFirst()
-                .orElse(CommonErrorCode.INTERNAL_SERVER_ERROR);
+                .orElse(EnCmmErrCode.INTERNAL_SERVER_ERROR);
     }
 }

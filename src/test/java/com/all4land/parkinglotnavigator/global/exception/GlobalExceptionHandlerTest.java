@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.all4land.parkinglotnavigator.global.response.CommonErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -81,7 +81,7 @@ class GlobalExceptionHandlerTest {
 
         @GetMapping("/test/business")
         void business() {
-            throw new BusinessException(CommonErrorCode.CONFLICT, "이미 처리된 요청");
+            throw new BusinessException(EnCmmErrCode.CONFLICT, "이미 처리된 요청");
         }
 
         @PostMapping("/test/valid")

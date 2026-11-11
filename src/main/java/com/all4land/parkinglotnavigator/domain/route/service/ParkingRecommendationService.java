@@ -5,7 +5,7 @@ import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationRe
 import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationResponse;
 import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationResponse.Item;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
-import com.all4land.parkinglotnavigator.global.response.CommonErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -35,7 +35,7 @@ public class ParkingRecommendationService {
                 destination.latitude(), destination.longitude(), request.radius());
 
         if (candidates.size() > MAX_CANDIDATES) {
-            throw new BusinessException(CommonErrorCode.BAD_REQUEST, "추천 후보가 50개를 초과했습니다. 검색 반경을 줄여주세요.");
+            throw new BusinessException(EnCmmErrCode.BAD_REQUEST, "추천 후보가 50개를 초과했습니다. 검색 반경을 줄여주세요.");
         }
 
         var origin = request.origin();

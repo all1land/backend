@@ -4,7 +4,7 @@ import com.all4land.parkinglotnavigator.domain.route.dto.RouteCoordinateRequest;
 import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
 import com.all4land.parkinglotnavigator.domain.route.service.RouteService;
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
-import com.all4land.parkinglotnavigator.global.response.CommonSuccessCode;
+import com.all4land.parkinglotnavigator.global.response.EnCmmScssCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +31,6 @@ public class RouteController {
                 request.destination().latitude(),
                 request.destination().longitude());
 
-        return ApiResponse.success(CommonSuccessCode.OK, response);
+        return ApiResponse.success(EnCmmScssCode.OK, response);
     }
 }

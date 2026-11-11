@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
-public enum CommonErrorCode implements BaseErrorCode {
+public enum EnCmmErrCode implements BaseErrorCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "COMMON_400_001", "잘못된 요청입니다."),
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "COMMON_400_002", "요청 값 검증에 실패했습니다."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON_404_001", "요청한 리소스를 찾을 수 없습니다."),

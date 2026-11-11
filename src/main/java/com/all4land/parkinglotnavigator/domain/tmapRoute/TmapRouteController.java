@@ -3,7 +3,7 @@ package com.all4land.parkinglotnavigator.domain.tmapRoute;
 import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteRequest;
 import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteResponse;
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
-import com.all4land.parkinglotnavigator.global.response.CommonSuccessCode;
+import com.all4land.parkinglotnavigator.global.response.EnCmmScssCode;
 import com.all4land.parkinglotnavigator.swagger.RouteApi;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +22,12 @@ public class TmapRouteController implements RouteApi {
     @Override
     @GetMapping("/driving")
     public ApiResponse<TmapRouteResponse> driving(@Valid @ModelAttribute TmapRouteRequest request) {
-        return ApiResponse.success(CommonSuccessCode.OK, tmapRouteService.driving(request));
+        return ApiResponse.success(EnCmmScssCode.OK, tmapRouteService.driving(request));
     }
 
     @Override
     @GetMapping("/walking")
     public ApiResponse<TmapRouteResponse> walking(@Valid @ModelAttribute TmapRouteRequest request) {
-        return ApiResponse.success(CommonSuccessCode.OK, tmapRouteService.walking(request));
+        return ApiResponse.success(EnCmmScssCode.OK, tmapRouteService.walking(request));
     }
 }

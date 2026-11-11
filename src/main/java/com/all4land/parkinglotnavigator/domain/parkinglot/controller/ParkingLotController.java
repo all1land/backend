@@ -4,7 +4,7 @@ import com.all4land.parkinglotnavigator.domain.parkinglot.dto.ParkingLotDetailRe
 import com.all4land.parkinglotnavigator.domain.parkinglot.dto.ParkingLotNearbyResponse;
 import com.all4land.parkinglotnavigator.domain.parkinglot.service.ParkingLotService;
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
-import com.all4land.parkinglotnavigator.global.response.CommonSuccessCode;
+import com.all4land.parkinglotnavigator.global.response.EnCmmScssCode;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Positive;
@@ -26,7 +26,7 @@ public class ParkingLotController {
 
         ParkingLotDetailResponse response = parkingLotService.getParkingLot(parkingId);
 
-        return ApiResponse.success(CommonSuccessCode.OK, response);
+        return ApiResponse.success(EnCmmScssCode.OK, response);
     }
 
     @GetMapping("/nearby")
@@ -37,6 +37,6 @@ public class ParkingLotController {
 
         List<ParkingLotNearbyResponse> response = parkingLotService.getNearbyParkingLots(latitude, longitude, radius);
 
-        return ApiResponse.success(CommonSuccessCode.OK, response);
+        return ApiResponse.success(EnCmmScssCode.OK, response);
     }
 }
