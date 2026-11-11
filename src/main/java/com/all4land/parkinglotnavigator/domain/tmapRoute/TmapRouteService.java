@@ -23,7 +23,7 @@ import tools.jackson.databind.JsonNode;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RouteService {
+public class TmapRouteService {
 
     private static final String LINE_STRING = "LineString";
 
@@ -40,7 +40,8 @@ public class RouteService {
     }
 
     // Tmap 응답 본문에는 내부 정보가 섞일 수 있어 로그로만 남기고, 클라이언트에는 우리 에러 코드만 내려준다.
-    private com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse call(Supplier<com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse> tmapCall) {
+    private com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse call(
+            Supplier<com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse> tmapCall) {
         try {
             return tmapCall.get();
         } catch (HttpClientErrorException.BadRequest ex) {
@@ -58,7 +59,8 @@ public class RouteService {
         }
     }
 
-    private TmapRouteResponse toRoute(com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse response) {
+    private TmapRouteResponse toRoute(
+            com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse response) {
         List<Feature> features = response == null || response.features() == null ? List.of() : response.features();
         FeatureProperties summary = features.stream()
                 .map(Feature::properties)
