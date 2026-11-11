@@ -1,7 +1,7 @@
 package com.all4land.parkinglotnavigator.swagger;
 
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteRequest;
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
+import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteRequest;
+import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteResponse;
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -24,7 +24,7 @@ public interface RouteApi {
                 responseCode = "504",
                 description = "Tmap 응답 없음 (ROUTE_504_001)")
     })
-    ApiResponse<RouteResponse> driving(@ParameterObject RouteRequest request);
+    ApiResponse<TmapRouteResponse> driving(@ParameterObject TmapRouteRequest request);
 
     @Operation(summary = "보행자 경로 안내", description = "출발지에서 도착지까지의 보행자 경로를 조회한다.")
     @ApiResponses({
@@ -39,5 +39,5 @@ public interface RouteApi {
                 responseCode = "504",
                 description = "Tmap 응답 없음 (ROUTE_504_001)")
     })
-    ApiResponse<RouteResponse> walking(@ParameterObject RouteRequest request);
+    ApiResponse<TmapRouteResponse> walking(@ParameterObject TmapRouteRequest request);
 }

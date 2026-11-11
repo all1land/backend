@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 // 실제 주차장·도보·차량 데이터를 조회한다. 데이터를 추가하거나 변경하지 않는다.
 @SpringBootTest
-class IntegratedRouteServiceTest {
+class IntegratedTmapRouteServiceTest {
 
     @Autowired
     private IntegratedRouteService integratedRouteService;

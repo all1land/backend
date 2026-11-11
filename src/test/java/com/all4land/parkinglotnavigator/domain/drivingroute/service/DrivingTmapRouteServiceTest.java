@@ -18,7 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 // 실제 적재 데이터(강서구 차량 네트워크, 강서구 주차장 seed)에 붙여서 검증한다. 데이터를 쓰지 않고 조회만 한다.
 @SpringBootTest
-class DrivingRouteServiceTest {
+class DrivingTmapRouteServiceTest {
 
     // 발산역 사거리 부근
     private static final double BALSAN_LAT = 37.5585;

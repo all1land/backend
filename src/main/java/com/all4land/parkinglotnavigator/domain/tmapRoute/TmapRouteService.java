@@ -1,12 +1,11 @@
-package com.all4land.parkinglotnavigator.domain.route;
+package com.all4land.parkinglotnavigator.domain.tmapRoute;
 
 import com.all4land.parkinglotnavigator.domain.external.tmap.TmapClient;
-import com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse;
 import com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse.Feature;
 import com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse.FeatureProperties;
 import com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse.Geometry;
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteRequest;
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
+import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteRequest;
+import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteResponse;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,36 +29,36 @@ public class RouteService {
 
     private final TmapClient tmapClient;
 
-    public RouteResponse driving(RouteRequest request) {
+    public TmapRouteResponse driving(TmapRouteRequest request) {
         return toRoute(call(
                 () -> tmapClient.driving(request.startLng(), request.startLat(), request.endLng(), request.endLat())));
     }
 
-    public RouteResponse walking(RouteRequest request) {
+    public TmapRouteResponse walking(TmapRouteRequest request) {
         return toRoute(call(() ->
                 tmapClient.pedestrian(request.startLng(), request.startLat(), request.endLng(), request.endLat())));
     }
 
     // Tmap 응답 본문에는 내부 정보가 섞일 수 있어 로그로만 남기고, 클라이언트에는 우리 에러 코드만 내려준다.
-    private TmapRouteResponse call(Supplier<TmapRouteResponse> tmapCall) {
+    private com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse call(Supplier<com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse> tmapCall) {
         try {
             return tmapCall.get();
         } catch (HttpClientErrorException.BadRequest ex) {
             log.warn("[Tmap] 경로 탐색 불가 요청: {}", ex.getResponseBodyAsString());
-            throw new BusinessException(RouteErrorCode.ROUTE_NOT_AVAILABLE);
+            throw new BusinessException(TmapRouteErrorCode.ROUTE_NOT_AVAILABLE);
         } catch (RestClientResponseException ex) {
             log.error("[Tmap] 호출 실패 status={}, body={}", ex.getStatusCode().value(), ex.getResponseBodyAsString());
-            throw new BusinessException(RouteErrorCode.ROUTE_API_FAILED);
+            throw new BusinessException(TmapRouteErrorCode.ROUTE_API_FAILED);
         } catch (ResourceAccessException ex) {
             log.error("[Tmap] 연결 실패 또는 응답 지연", ex);
-            throw new BusinessException(RouteErrorCode.ROUTE_API_TIMEOUT);
+            throw new BusinessException(TmapRouteErrorCode.ROUTE_API_TIMEOUT);
         } catch (RestClientException ex) {
             log.error("[Tmap] 응답 처리 실패", ex);
-            throw new BusinessException(RouteErrorCode.ROUTE_API_FAILED);
+            throw new BusinessException(TmapRouteErrorCode.ROUTE_API_FAILED);
         }
     }
 
-    private RouteResponse toRoute(TmapRouteResponse response) {
+    private TmapRouteResponse toRoute(com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse response) {
         List<Feature> features = response == null || response.features() == null ? List.of() : response.features();
         FeatureProperties summary = features.stream()
                 .map(Feature::properties)
@@ -67,9 +66,9 @@ public class RouteService {
                 .findFirst()
                 .orElseThrow(() -> {
                     log.error("[Tmap] 응답에 경로 요약(totalDistance, totalTime)이 없습니다.");
-                    return new BusinessException(RouteErrorCode.ROUTE_API_FAILED);
+                    return new BusinessException(TmapRouteErrorCode.ROUTE_API_FAILED);
                 });
-        return new RouteResponse(summary.totalDistance(), summary.totalTime(), lineCoordinates(features));
+        return new TmapRouteResponse(summary.totalDistance(), summary.totalTime(), lineCoordinates(features));
     }
 
     // 구간(LineString)별 좌표를 순서대로 이어 붙인다. 구간 경계 좌표가 겹칠 수 있어 직전 좌표와 같으면 건너뛴다.

@@ -1,11 +1,11 @@
-package com.all4land.parkinglotnavigator.domain.route.dto;
+package com.all4land.parkinglotnavigator.domain.tmapRoute.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 
-public record RouteRequest(
+public record TmapRouteRequest(
         @Schema(description = "출발지 위도", example = "37.5509") @NotNull @DecimalMin("-90") @DecimalMax("90") Double startLat,
 
         @Schema(description = "출발지 경도", example = "126.8495") @NotNull @DecimalMin("-180") @DecimalMax("180") Double startLng,

@@ -1,9 +1,9 @@
-package com.all4land.parkinglotnavigator.domain.route.dto;
+package com.all4land.parkinglotnavigator.domain.tmapRoute.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
-public record RouteResponse(
+public record TmapRouteResponse(
         @Schema(description = "총 거리(m)", example = "1520") int distanceMeters,
         @Schema(description = "총 소요 시간(초)", example = "420") int durationSeconds,
 

@@ -1,4 +1,4 @@
-package com.all4land.parkinglotnavigator.domain.route;
+package com.all4land.parkinglotnavigator.domain.tmapRoute;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -11,8 +11,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.all4land.parkinglotnavigator.domain.external.tmap.TmapClient;
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteRequest;
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
+import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteRequest;
+import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteResponse;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +21,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
-class RouteServiceTest {
+class TmapRouteServiceTest {
 
     private static final String BASE_URL = "https://apis.openapi.sk.com";
-    private static final RouteRequest REQUEST = new RouteRequest(37.5509, 126.8495, 37.5583, 126.8389);
+    private static final TmapRouteRequest REQUEST = new TmapRouteRequest(37.5509, 126.8495, 37.5583, 126.8389);
 
     // Tmap 문서의 응답 예시 형태: 출발지 Point(요약 포함) → LineString 구간들 → 도착지 Point
     private static final String ROUTE_JSON = """
@@ -51,13 +51,13 @@ class RouteServiceTest {
             """;
 
     private MockRestServiceServer server;
-    private RouteService routeService;
+    private TmapRouteService tmapRouteService;
 
     @BeforeEach
     void setUp() {
         RestClient.Builder builder = RestClient.builder().baseUrl(BASE_URL).defaultHeader("appKey", "test-key");
         server = MockRestServiceServer.bindTo(builder).build();
-        routeService = new RouteService(new TmapClient(builder.build()));
+        tmapRouteService = new TmapRouteService(new TmapClient(builder.build()));
     }
 
     @Test
@@ -70,7 +70,7 @@ class RouteServiceTest {
                 .andExpect(jsonPath("$.startName").doesNotExist())
                 .andRespond(withSuccess(ROUTE_JSON, MediaType.APPLICATION_JSON));
 
-        RouteResponse route = routeService.driving(REQUEST);
+        TmapRouteResponse route = tmapRouteService.driving(REQUEST);
 
         assertThat(route.distanceMeters()).isEqualTo(1520);
         assertThat(route.durationSeconds()).isEqualTo(420);
@@ -90,7 +90,7 @@ class RouteServiceTest {
                 .andExpect(jsonPath("$.endName").value("%EB%8F%84%EC%B0%A9%EC%A7%80"))
                 .andRespond(withSuccess(ROUTE_JSON, MediaType.APPLICATION_JSON));
 
-        assertThat(routeService.walking(REQUEST).durationSeconds()).isEqualTo(420);
+        assertThat(tmapRouteService.walking(REQUEST).durationSeconds()).isEqualTo(420);
         server.verify();
     }
 
@@ -98,20 +98,20 @@ class RouteServiceTest {
     void tmapBadRequestBecomesRouteNotAvailable() {
         server.expect(requestTo(BASE_URL + "/tmap/routes?version=1")).andRespond(withBadRequest());
 
-        assertThatThrownBy(() -> routeService.driving(REQUEST))
+        assertThatThrownBy(() -> tmapRouteService.driving(REQUEST))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
-                .isEqualTo(RouteErrorCode.ROUTE_NOT_AVAILABLE);
+                .isEqualTo(TmapRouteErrorCode.ROUTE_NOT_AVAILABLE);
     }
 
     @Test
     void tmapServerErrorBecomesApiFailed() {
         server.expect(requestTo(BASE_URL + "/tmap/routes?version=1")).andRespond(withServerError());
 
-        assertThatThrownBy(() -> routeService.driving(REQUEST))
+        assertThatThrownBy(() -> tmapRouteService.driving(REQUEST))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
-                .isEqualTo(RouteErrorCode.ROUTE_API_FAILED);
+                .isEqualTo(TmapRouteErrorCode.ROUTE_API_FAILED);
     }
 
     @Test
@@ -120,9 +120,9 @@ class RouteServiceTest {
                 .andRespond(
                         withSuccess("{\"type\":\"FeatureCollection\",\"features\":[]}", MediaType.APPLICATION_JSON));
 
-        assertThatThrownBy(() -> routeService.driving(REQUEST))
+        assertThatThrownBy(() -> tmapRouteService.driving(REQUEST))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
-                .isEqualTo(RouteErrorCode.ROUTE_API_FAILED);
+                .isEqualTo(TmapRouteErrorCode.ROUTE_API_FAILED);
     }
 }

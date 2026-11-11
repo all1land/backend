@@ -1,4 +1,4 @@
-package com.all4land.parkinglotnavigator.domain.route;
+package com.all4land.parkinglotnavigator.domain.tmapRoute;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
+import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteResponse;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -15,19 +15,19 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(RouteController.class)
-class RouteControllerTest {
+@WebMvcTest(TmapRouteController.class)
+class TmapRouteControllerTest {
 
     @Autowired
     MockMvc mockMvc;
 
     @MockitoBean
-    RouteService routeService;
+    TmapRouteService tmapRouteService;
 
     @Test
     void drivingReturnsRoute() throws Exception {
-        given(routeService.driving(any()))
-                .willReturn(new RouteResponse(1520, 420, List.of(new double[] {126.8495, 37.5509})));
+        given(tmapRouteService.driving(any()))
+                .willReturn(new TmapRouteResponse(1520, 420, List.of(new double[] {126.8495, 37.5509})));
 
         mockMvc.perform(get("/api/routes/tmap/driving")
                         .param("startLat", "37.5509")
@@ -64,7 +64,7 @@ class RouteControllerTest {
 
     @Test
     void tmapFailureIsBadGateway() throws Exception {
-        given(routeService.driving(any())).willThrow(new BusinessException(RouteErrorCode.ROUTE_API_FAILED));
+        given(tmapRouteService.driving(any())).willThrow(new BusinessException(TmapRouteErrorCode.ROUTE_API_FAILED));
 
         mockMvc.perform(get("/api/routes/tmap/driving")
                         .param("startLat", "37.5509")
