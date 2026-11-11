@@ -1,9 +1,7 @@
 package com.all4land.parkinglotnavigator.domain.route.service;
 
 import com.all4land.parkinglotnavigator.domain.parkinglot.service.ParkingLotService;
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.service.DrivingRouteService;
 import com.all4land.parkinglotnavigator.domain.route.dto.RouteResDTO;
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.service.WalkingRouteService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

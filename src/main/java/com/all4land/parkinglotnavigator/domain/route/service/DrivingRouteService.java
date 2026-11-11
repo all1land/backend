@@ -1,11 +1,11 @@
-package com.all4land.parkinglotnavigator.domain.route.drivingroute.service;
+package com.all4land.parkinglotnavigator.domain.route.service;
 
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.DrivingRouteProperties;
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegmentDTO;
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.DrivingRouteRepository;
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.DrivingRouteRepository.DriveCost;
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.DrivingRouteRepository.PathPart;
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.DrivingRouteRepository.SnappedPoint;
+import com.all4land.parkinglotnavigator.domain.route.DrivingRouteProperties;
+import com.all4land.parkinglotnavigator.domain.route.dto.DrivingRouteSegmentDTO;
+import com.all4land.parkinglotnavigator.domain.route.repository.DrivingRouteRepository;
+import com.all4land.parkinglotnavigator.domain.route.repository.DrivingRouteRepository.DriveCost;
+import com.all4land.parkinglotnavigator.domain.route.repository.DrivingRouteRepository.PathPart;
+import com.all4land.parkinglotnavigator.domain.route.repository.DrivingRouteRepository.SnappedPoint;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import java.util.ArrayList;

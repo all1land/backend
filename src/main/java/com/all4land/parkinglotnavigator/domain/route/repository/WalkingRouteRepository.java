@@ -1,4 +1,4 @@
-package com.all4land.parkinglotnavigator.domain.route.walkingroute.repository;
+package com.all4land.parkinglotnavigator.domain.route.repository;
 
 import java.sql.Array;
 import java.sql.ResultSet;

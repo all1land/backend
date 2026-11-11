@@ -2,9 +2,9 @@ package com.all4land.parkinglotnavigator.domain.route.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegmentDTO;
+import com.all4land.parkinglotnavigator.domain.route.dto.DrivingRouteSegmentDTO;
 import com.all4land.parkinglotnavigator.domain.route.dto.TravelMode;
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegmentDTO;
+import com.all4land.parkinglotnavigator.domain.route.dto.WalkingRouteSegmentDTO;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 

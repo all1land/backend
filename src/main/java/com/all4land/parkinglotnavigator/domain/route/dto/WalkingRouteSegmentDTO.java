@@ -1,4 +1,4 @@
-package com.all4land.parkinglotnavigator.domain.route.walkingroute.dto;
+package com.all4land.parkinglotnavigator.domain.route.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;

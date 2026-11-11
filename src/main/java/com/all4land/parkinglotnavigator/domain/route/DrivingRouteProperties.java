@@ -1,4 +1,4 @@
-package com.all4land.parkinglotnavigator.domain.route.drivingroute;
+package com.all4land.parkinglotnavigator.domain.route;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

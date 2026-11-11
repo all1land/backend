@@ -1,10 +1,10 @@
 package com.all4land.parkinglotnavigator.domain.route.service;
 
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegmentDTO;
+import com.all4land.parkinglotnavigator.domain.route.dto.DrivingRouteSegmentDTO;
 import com.all4land.parkinglotnavigator.domain.route.dto.RouteResDTO;
 import com.all4land.parkinglotnavigator.domain.route.dto.RouteSegmentDTO;
 import com.all4land.parkinglotnavigator.domain.route.dto.TravelMode;
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegmentDTO;
+import com.all4land.parkinglotnavigator.domain.route.dto.WalkingRouteSegmentDTO;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;

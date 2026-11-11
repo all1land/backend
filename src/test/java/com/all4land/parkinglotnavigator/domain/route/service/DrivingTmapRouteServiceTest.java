@@ -1,11 +1,11 @@
-package com.all4land.parkinglotnavigator.domain.route.drivingroute.service;
+package com.all4land.parkinglotnavigator.domain.route.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.DrivingRouteProperties;
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegmentDTO;
+import com.all4land.parkinglotnavigator.domain.route.DrivingRouteProperties;
+import com.all4land.parkinglotnavigator.domain.route.dto.DrivingRouteSegmentDTO;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import java.util.List;
