@@ -6,8 +6,8 @@ import static org.assertj.core.api.Assertions.within;
 
 import com.all4land.parkinglotnavigator.domain.parkinglot.service.ParkingLotService;
 import com.all4land.parkinglotnavigator.domain.route.dto.TravelMode;
-import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

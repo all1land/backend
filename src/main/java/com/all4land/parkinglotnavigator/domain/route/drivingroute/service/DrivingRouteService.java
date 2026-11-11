@@ -1,6 +1,5 @@
 package com.all4land.parkinglotnavigator.domain.route.drivingroute.service;
 
-import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.DrivingRouteProperties;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegment;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.DrivingRouteRepository;
@@ -8,6 +7,7 @@ import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.Dri
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.DrivingRouteRepository.PathPart;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.DrivingRouteRepository.SnappedPoint;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

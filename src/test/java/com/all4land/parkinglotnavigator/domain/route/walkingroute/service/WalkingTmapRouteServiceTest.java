@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
-import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.WalkingRouteProperties;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegment;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import java.util.List;
 import java.util.Map;
 import org.assertj.core.api.SoftAssertions;
@@ -115,8 +115,7 @@ class WalkingTmapRouteServiceTest {
     @Test
     void startFarFromWalkNetworkIsRejected() {
         assertErrorCode(
-                () -> route(GANGNAM_LAT, GANGNAM_LNG, GAEHWA_LAT, GAEHWA_LNG),
-                EnRouteErrCode.WALK_LINK_NOT_NEARBY);
+                () -> route(GANGNAM_LAT, GANGNAM_LNG, GAEHWA_LAT, GAEHWA_LNG), EnRouteErrCode.WALK_LINK_NOT_NEARBY);
     }
 
     @Test

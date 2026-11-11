@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
-import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.DrivingRouteProperties;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegment;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import java.util.List;
 import java.util.Map;
 import org.assertj.core.api.SoftAssertions;
@@ -153,8 +153,7 @@ class DrivingTmapRouteServiceTest {
     @Test
     void endFarFromRoadNetworkIsRejected() {
         assertErrorCode(
-                () -> route(BALSAN_LAT, BALSAN_LNG, GANGNAM_LAT, GANGNAM_LNG),
-                EnRouteErrCode.ROAD_LINK_NOT_NEARBY);
+                () -> route(BALSAN_LAT, BALSAN_LNG, GANGNAM_LAT, GANGNAM_LNG), EnRouteErrCode.ROAD_LINK_NOT_NEARBY);
     }
 
     @Test

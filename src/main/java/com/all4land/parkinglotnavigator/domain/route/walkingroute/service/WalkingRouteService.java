@@ -1,12 +1,12 @@
 package com.all4land.parkinglotnavigator.domain.route.walkingroute.service;
 
-import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.WalkingRouteProperties;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegment;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.repository.WalkingRouteRepository;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.repository.WalkingRouteRepository.PathPart;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.repository.WalkingRouteRepository.SnappedPoint;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

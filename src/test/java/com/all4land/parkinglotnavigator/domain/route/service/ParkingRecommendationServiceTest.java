@@ -7,13 +7,13 @@ import static org.mockito.Mockito.*;
 
 import com.all4land.parkinglotnavigator.domain.parkinglot.dto.ParkingLotNearbyResponse;
 import com.all4land.parkinglotnavigator.domain.parkinglot.service.ParkingLotService;
-import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationRequest;
 import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationResponse.Item;
 import com.all4land.parkinglotnavigator.domain.route.dto.RouteCoordinate;
 import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import java.util.List;
 import java.util.stream.LongStream;
 import org.junit.jupiter.api.Test;
