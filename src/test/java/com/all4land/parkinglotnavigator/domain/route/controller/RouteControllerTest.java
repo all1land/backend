@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
 import com.all4land.parkinglotnavigator.domain.route.service.RouteService;
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.WalkingRouteErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -87,7 +87,7 @@ class RouteControllerTest {
     @Test
     void preservesRouteErrorWithoutPartialSuccess() throws Exception {
         when(routeService.route(37.5586, 126.8377, 37.5585, 126.8376, 1L, 37.5673, 126.8270))
-                .thenThrow(new BusinessException(WalkingRouteErrorCode.WALK_LINK_NOT_NEARBY));
+                .thenThrow(new BusinessException(EnRouteErrCode.WALK_LINK_NOT_NEARBY));
 
         mockMvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content(REQUEST))
                 .andExpect(status().isBadRequest())

@@ -1,7 +1,7 @@
 package com.all4land.parkinglotnavigator.global.exception;
 
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
-import com.all4land.parkinglotnavigator.global.response.BaseErrorCode;
+import com.all4land.parkinglotnavigator.global.response.CmmErrCode;
 import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -108,7 +108,7 @@ public class GlobalExceptionHandler {
 
     // Content-Type을 JSON으로 고정한다. 요청의 Accept가 JSON이 아니면(예: application/xml) 에러 응답을 쓰는
     // 도중에 406이 다시 터져 원래 상태 코드가 사라지기 때문이다.
-    static ResponseEntity<ApiResponse<Void>> toResponse(BaseErrorCode errorCode, List<String> errorDetail) {
+    static ResponseEntity<ApiResponse<Void>> toResponse(CmmErrCode errorCode, List<String> errorDetail) {
         return ResponseEntity.status(errorCode.getHttpStatus())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.fail(errorCode, errorDetail));

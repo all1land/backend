@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.WalkingRouteErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.WalkingRouteProperties;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegment;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
@@ -116,14 +116,14 @@ class WalkingTmapRouteServiceTest {
     void startFarFromWalkNetworkIsRejected() {
         assertErrorCode(
                 () -> route(GANGNAM_LAT, GANGNAM_LNG, GAEHWA_LAT, GAEHWA_LNG),
-                WalkingRouteErrorCode.WALK_LINK_NOT_NEARBY);
+                EnRouteErrCode.WALK_LINK_NOT_NEARBY);
     }
 
     @Test
     void endFarFromWalkNetworkIsRejected() {
         assertErrorCode(
                 () -> route(SINBANGHWA_LAT, SINBANGHWA_LNG, GANGNAM_LAT, GANGNAM_LNG),
-                WalkingRouteErrorCode.WALK_LINK_NOT_NEARBY);
+                EnRouteErrCode.WALK_LINK_NOT_NEARBY);
     }
 
     @Test
@@ -132,7 +132,7 @@ class WalkingTmapRouteServiceTest {
 
         assertErrorCode(
                 () -> route(SINBANGHWA_LAT, SINBANGHWA_LNG, isolated[1], isolated[0]),
-                WalkingRouteErrorCode.WALKING_ROUTE_NOT_FOUND);
+                EnRouteErrCode.WALKING_ROUTE_NOT_FOUND);
     }
 
     @Test
@@ -191,7 +191,7 @@ class WalkingTmapRouteServiceTest {
         }
     }
 
-    private static void assertErrorCode(Runnable call, WalkingRouteErrorCode expected) {
+    private static void assertErrorCode(Runnable call, EnRouteErrCode expected) {
         assertThatThrownBy(call::run)
                 .isInstanceOfSatisfying(BusinessException.class, ex -> assertThat(ex.getErrorCode())
                         .isEqualTo(expected));

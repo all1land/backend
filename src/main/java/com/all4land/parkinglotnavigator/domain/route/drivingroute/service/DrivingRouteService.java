@@ -1,6 +1,6 @@
 package com.all4land.parkinglotnavigator.domain.route.drivingroute.service;
 
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.DrivingRouteErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.DrivingRouteProperties;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegment;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.DrivingRouteRepository;
@@ -41,8 +41,8 @@ public class DrivingRouteService {
      * @param endLat 도착지 위도 (WGS84, EPSG:4326)
      * @param endLng 도착지 경도 (WGS84, EPSG:4326)
      * @return 출발지부터 순서대로 이어지는 구간 목록. 모든 좌표는 WGS84(EPSG:4326)이며 coordinates는 [경도, 위도] 순서
-     * @throws BusinessException 출발지/도착지 근처에 차량 도로가 없거나({@link DrivingRouteErrorCode#ROAD_LINK_NOT_NEARBY}), 두
-     *     지점이 네트워크로 이어지지 않을 때({@link DrivingRouteErrorCode#DRIVING_ROUTE_NOT_FOUND})
+     * @throws BusinessException 출발지/도착지 근처에 차량 도로가 없거나({@link EnRouteErrCode#ROAD_LINK_NOT_NEARBY}), 두
+     *     지점이 네트워크로 이어지지 않을 때({@link EnRouteErrCode#DRIVING_ROUTE_NOT_FOUND})
      */
     public List<DrivingRouteSegment> route(double startLat, double startLng, double endLat, double endLng) {
         if (startLat == endLat && startLng == endLng) {
@@ -55,7 +55,7 @@ public class DrivingRouteService {
 
         List<PathPart> path = drivingRouteRepository.findPath(best.start(), best.end());
         if (path.isEmpty() && !samePosition(best.start(), best.end())) {
-            throw new BusinessException(DrivingRouteErrorCode.DRIVING_ROUTE_NOT_FOUND);
+            throw new BusinessException(EnRouteErrCode.DRIVING_ROUTE_NOT_FOUND);
         }
 
         List<DrivingRouteSegment> segments = new ArrayList<>();
@@ -70,7 +70,7 @@ public class DrivingRouteService {
         List<SnappedPoint> candidates = drivingRouteRepository.snap(
                 lat, lng, properties.snapCandidateCount(), properties.maxSnapDistanceMeters());
         if (candidates.isEmpty()) {
-            throw new BusinessException(DrivingRouteErrorCode.ROAD_LINK_NOT_NEARBY);
+            throw new BusinessException(EnRouteErrCode.ROAD_LINK_NOT_NEARBY);
         }
         return candidates;
     }
@@ -90,7 +90,7 @@ public class DrivingRouteService {
             }
         }
         if (best == null) {
-            throw new BusinessException(DrivingRouteErrorCode.DRIVING_ROUTE_NOT_FOUND);
+            throw new BusinessException(EnRouteErrCode.DRIVING_ROUTE_NOT_FOUND);
         }
         return best;
     }

@@ -23,19 +23,19 @@ public class ApiResponse<T> {
     @JsonIgnore
     private final HttpStatus httpStatus;
 
-    public static <T> ApiResponse<T> success(BaseSuccessCode sc, T data) {
+    public static <T> ApiResponse<T> success(CmmScssCode sc, T data) {
         return new ApiResponse<>(true, sc.getCode(), sc.getMessage(), data, List.of(), sc.getHttpStatus());
     }
 
-    public static ApiResponse<Void> success(BaseSuccessCode sc) {
+    public static ApiResponse<Void> success(CmmScssCode sc) {
         return success(sc, null);
     }
 
-    public static ApiResponse<Void> fail(BaseErrorCode ec) {
+    public static ApiResponse<Void> fail(CmmErrCode ec) {
         return fail(ec, List.of());
     }
 
-    public static ApiResponse<Void> fail(BaseErrorCode ec, List<String> errorDetail) {
+    public static ApiResponse<Void> fail(CmmErrCode ec, List<String> errorDetail) {
         return new ApiResponse<>(
                 false, ec.getCode(), ec.getMessage(), null, List.copyOf(errorDetail), ec.getHttpStatus());
     }

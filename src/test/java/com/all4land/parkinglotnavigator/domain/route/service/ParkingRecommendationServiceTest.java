@@ -7,7 +7,7 @@ import static org.mockito.Mockito.*;
 
 import com.all4land.parkinglotnavigator.domain.parkinglot.dto.ParkingLotNearbyResponse;
 import com.all4land.parkinglotnavigator.domain.parkinglot.service.ParkingLotService;
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.DrivingRouteErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationRequest;
 import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationResponse.Item;
 import com.all4land.parkinglotnavigator.domain.route.dto.RouteCoordinate;
@@ -96,7 +96,7 @@ class ParkingRecommendationServiceTest {
         when(routes.route(anyDouble(), anyDouble(), anyDouble(), anyDouble(), eq(1L), anyDouble(), anyDouble()))
                 .thenReturn(new RouteResponse(List.of(), 100, 100));
 
-        var failure = new BusinessException(DrivingRouteErrorCode.DRIVING_ROUTE_NOT_FOUND);
+        var failure = new BusinessException(EnRouteErrCode.DRIVING_ROUTE_NOT_FOUND);
         when(routes.route(anyDouble(), anyDouble(), anyDouble(), anyDouble(), eq(2L), anyDouble(), anyDouble()))
                 .thenThrow(failure);
 

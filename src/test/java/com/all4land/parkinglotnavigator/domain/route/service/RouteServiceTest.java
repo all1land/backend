@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.within;
 
 import com.all4land.parkinglotnavigator.domain.parkinglot.service.ParkingLotService;
 import com.all4land.parkinglotnavigator.domain.route.dto.TravelMode;
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.WalkingRouteErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +104,7 @@ class RouteServiceTest {
         // 앞부분 계산 후, 강서구 보행망 밖인 강남역을 목적지로 지정한다.
         assertThatThrownBy(() -> routeService.route(37.5585, 126.8376, 37.5585, 126.8376, parkingId, 37.4979, 127.0276))
                 .isInstanceOfSatisfying(BusinessException.class, exception -> assertThat(exception.getErrorCode())
-                        .isEqualTo(WalkingRouteErrorCode.WALK_LINK_NOT_NEARBY));
+                        .isEqualTo(EnRouteErrCode.WALK_LINK_NOT_NEARBY));
     }
 
     @Test

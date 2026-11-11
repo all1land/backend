@@ -5,12 +5,11 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.DrivingRouteErrorCode;
+import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationResponse;
 import com.all4land.parkinglotnavigator.domain.route.service.ParkingRecommendationService;
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.WalkingRouteErrorCode;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
-import com.all4land.parkinglotnavigator.global.response.BaseErrorCode;
+import com.all4land.parkinglotnavigator.global.response.CmmErrCode;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,11 +70,11 @@ class ParkingRecommendationControllerTest {
 
     @Test
     void preservesWalkingAndDrivingErrorsWithoutPartialRecommendations() throws Exception {
-        List<BaseErrorCode> errors = List.of(
-                WalkingRouteErrorCode.WALK_LINK_NOT_NEARBY,
-                WalkingRouteErrorCode.WALKING_ROUTE_NOT_FOUND,
-                DrivingRouteErrorCode.ROAD_LINK_NOT_NEARBY,
-                DrivingRouteErrorCode.DRIVING_ROUTE_NOT_FOUND);
+        List<CmmErrCode> errors = List.of(
+                EnRouteErrCode.WALK_LINK_NOT_NEARBY,
+                EnRouteErrCode.WALKING_ROUTE_NOT_FOUND,
+                EnRouteErrCode.ROAD_LINK_NOT_NEARBY,
+                EnRouteErrCode.DRIVING_ROUTE_NOT_FOUND);
 
         for (var error : errors) {
             reset(service);
