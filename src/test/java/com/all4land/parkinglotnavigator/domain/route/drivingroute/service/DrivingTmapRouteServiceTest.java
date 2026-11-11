@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.DrivingRouteProperties;
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegment;
+import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegmentDTO;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import java.util.List;
@@ -47,7 +47,7 @@ class DrivingTmapRouteServiceTest {
 
     @Test
     void routeStartsAtOriginEndsAtDestinationAndIsContinuous() {
-        List<DrivingRouteSegment> segments = route(BALSAN_LAT, BALSAN_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
+        List<DrivingRouteSegmentDTO> segments = route(BALSAN_LAT, BALSAN_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
 
         assertConnects(segments, BALSAN_LAT, BALSAN_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
         // 공항대로 → 방화대로 → 마곡서1로 주행 약 2,633m + 양 끝 접근 구간 약 7m, 33m
@@ -56,9 +56,9 @@ class DrivingTmapRouteServiceTest {
 
     @Test
     void firstAndLastSegmentsAreWalkingAccessSegments() {
-        List<DrivingRouteSegment> segments = route(BALSAN_LAT, BALSAN_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
+        List<DrivingRouteSegmentDTO> segments = route(BALSAN_LAT, BALSAN_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
 
-        for (DrivingRouteSegment access : List.of(segments.getFirst(), segments.getLast())) {
+        for (DrivingRouteSegmentDTO access : List.of(segments.getFirst(), segments.getLast())) {
             assertThat(access.coordinates()).hasSize(2);
             assertThat((double) access.durationSeconds())
                     .as("접근 구간 소요 시간 = 거리 / 보행 속도")
@@ -72,7 +72,7 @@ class DrivingTmapRouteServiceTest {
         double[] near = pointOnLink(linkId, 0.3);
         double[] far = pointOnLink(linkId, 0.7);
 
-        List<DrivingRouteSegment> segments = route(near[1], near[0], far[1], far[0]);
+        List<DrivingRouteSegmentDTO> segments = route(near[1], near[0], far[1], far[0]);
 
         // 첫 구간과 마지막 구간이 도보라는 것을 위치로 알 수 있게 거리 0이어도 넣는다
         assertThat(segments).hasSizeGreaterThanOrEqualTo(3);
@@ -82,10 +82,10 @@ class DrivingTmapRouteServiceTest {
 
     @Test
     void driveSegmentsMoveWithinSpeedLimits() {
-        List<DrivingRouteSegment> segments = route(BALSAN_LAT, BALSAN_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
+        List<DrivingRouteSegmentDTO> segments = route(BALSAN_LAT, BALSAN_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
 
         SoftAssertions softly = new SoftAssertions();
-        for (DrivingRouteSegment segment : segments.subList(1, segments.size() - 1)) {
+        for (DrivingRouteSegmentDTO segment : segments.subList(1, segments.size() - 1)) {
             double geometryLength = length(segment.coordinates());
             softly.assertThat((double) segment.distanceMeters())
                     .as("구간 거리 vs 좌표 길이")
@@ -107,8 +107,8 @@ class DrivingTmapRouteServiceTest {
         double[] near = pointOnLink(linkId, 0.3);
         double[] far = pointOnLink(linkId, 0.7);
 
-        List<DrivingRouteSegment> forward = route(near[1], near[0], far[1], far[0]);
-        List<DrivingRouteSegment> backward = route(far[1], far[0], near[1], near[0]);
+        List<DrivingRouteSegmentDTO> forward = route(near[1], near[0], far[1], far[0]);
+        List<DrivingRouteSegmentDTO> backward = route(far[1], far[0], near[1], near[0]);
 
         assertConnects(forward, near[1], near[0], far[1], far[0]);
         assertConnects(backward, far[1], far[0], near[1], near[0]);
@@ -122,9 +122,9 @@ class DrivingTmapRouteServiceTest {
     void doesNotSnapToExpressway() {
         double[] onExpressway = pointOnExpresswayNearOrdinaryRoad();
 
-        List<DrivingRouteSegment> segments = route(onExpressway[1], onExpressway[0], SINBANGHWA_LAT, SINBANGHWA_LNG);
+        List<DrivingRouteSegmentDTO> segments = route(onExpressway[1], onExpressway[0], SINBANGHWA_LAT, SINBANGHWA_LNG);
 
-        DrivingRouteSegment access = segments.getFirst();
+        DrivingRouteSegmentDTO access = segments.getFirst();
         assertThat(access.distanceMeters()).isPositive();
         String roadRank = jdbcTemplate.queryForObject("""
                 SELECT road_rank_code
@@ -138,7 +138,7 @@ class DrivingTmapRouteServiceTest {
 
     @Test
     void samePointReturnsEmptyRoute() {
-        List<DrivingRouteSegment> segments = route(BALSAN_LAT, BALSAN_LNG, BALSAN_LAT, BALSAN_LNG);
+        List<DrivingRouteSegmentDTO> segments = route(BALSAN_LAT, BALSAN_LNG, BALSAN_LAT, BALSAN_LNG);
 
         assertThat(segments).isEmpty();
     }
@@ -186,7 +186,7 @@ class DrivingTmapRouteServiceTest {
             double lng = (double) lot.get("lng");
             double straight = haversine(BALSAN_LNG, BALSAN_LAT, lng, lat);
             for (boolean outbound : new boolean[] {true, false}) {
-                List<DrivingRouteSegment> segments =
+                List<DrivingRouteSegmentDTO> segments =
                         outbound ? route(BALSAN_LAT, BALSAN_LNG, lat, lng) : route(lat, lng, BALSAN_LAT, BALSAN_LNG);
                 String label = lot.get("name") + (outbound ? " 가는 길" : " 오는 길");
                 softly.assertThat(segments).as(label).hasSizeGreaterThanOrEqualTo(2);
@@ -198,13 +198,13 @@ class DrivingTmapRouteServiceTest {
         softly.assertAll();
     }
 
-    private List<DrivingRouteSegment> route(double startLat, double startLng, double endLat, double endLng) {
+    private List<DrivingRouteSegmentDTO> route(double startLat, double startLng, double endLat, double endLng) {
         return drivingRouteService.route(startLat, startLng, endLat, endLng);
     }
 
     // 첫 구간은 출발지에서 시작, 마지막 구간은 도착지에서 끝, 구간끼리 끊김 없음, 각 구간 coordinates 양 끝 = 시작/끝 필드
     private static void assertConnects(
-            List<DrivingRouteSegment> segments, double startLat, double startLng, double endLat, double endLng) {
+            List<DrivingRouteSegmentDTO> segments, double startLat, double startLng, double endLat, double endLng) {
         assertThat(segments).isNotEmpty();
         assertThat(segments.getFirst().startLat()).isCloseTo(startLat, within(1e-9));
         assertThat(segments.getFirst().startLng()).isCloseTo(startLng, within(1e-9));
@@ -212,13 +212,13 @@ class DrivingTmapRouteServiceTest {
         assertThat(segments.getLast().endLng()).isCloseTo(endLng, within(1e-9));
 
         for (int i = 0; i + 1 < segments.size(); i++) {
-            DrivingRouteSegment current = segments.get(i);
-            DrivingRouteSegment next = segments.get(i + 1);
+            DrivingRouteSegmentDTO current = segments.get(i);
+            DrivingRouteSegmentDTO next = segments.get(i + 1);
             assertThat(next.startLat()).as("구간 %d → %d 이어짐", i, i + 1).isCloseTo(current.endLat(), within(1e-9));
             assertThat(next.startLng()).as("구간 %d → %d 이어짐", i, i + 1).isCloseTo(current.endLng(), within(1e-9));
         }
 
-        for (DrivingRouteSegment segment : segments) {
+        for (DrivingRouteSegmentDTO segment : segments) {
             assertThat(segment.coordinates()).hasSizeGreaterThanOrEqualTo(2);
             assertThat(segment.coordinates().getFirst()).containsExactly(segment.startLng(), segment.startLat());
             assertThat(segment.coordinates().getLast()).containsExactly(segment.endLng(), segment.endLat());
@@ -231,8 +231,10 @@ class DrivingTmapRouteServiceTest {
                         .isEqualTo(expected));
     }
 
-    private static int totalDistance(List<DrivingRouteSegment> segments) {
-        return segments.stream().mapToInt(DrivingRouteSegment::distanceMeters).sum();
+    private static int totalDistance(List<DrivingRouteSegmentDTO> segments) {
+        return segments.stream()
+                .mapToInt(DrivingRouteSegmentDTO::distanceMeters)
+                .sum();
     }
 
     // 일방통행 도로의 진행 방향 링크 하나. 구축 기준상 일방통행 도로는 반대 방향 링크가 미사용(ROAD_USE=1)으로 약 12m 옆에 있다.

@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Objects;
 
 @Schema(description = "공통 목록 응답")
-public record CmmListResponse<T>(
-        @Schema(description = "페이지 정보") CmmPagination pagination,
-        @Schema(description = "실제로 적용한 검색 조건") CmmFilter filter,
+public record CmmListResDTO<T>(
+        @Schema(description = "페이지 정보") CmmPaginationDTO pagination,
+        @Schema(description = "실제로 적용한 검색 조건") CmmFilterDTO filter,
 
         @Schema(description = "현재 페이지의 항목 목록 (결과가 없으면 빈 배열)") @JsonProperty("list")
         List<T> items) {
 
-    public CmmListResponse {
+    public CmmListResDTO {
 
         Objects.requireNonNull(pagination, "CommonPagination must not be null");
         Objects.requireNonNull(filter, "CommonFilter must not be null");
@@ -26,10 +26,10 @@ public record CmmListResponse<T>(
     }
 
     /** 필터링과 정렬이 완료된 전체 목록을 잘라 응답한다. */
-    public static <T> CmmListResponse<T> fromItems(List<T> items, int pageIndex, int pageSize, CmmFilter filter) {
+    public static <T> CmmListResDTO<T> fromItems(List<T> items, int pageIndex, int pageSize, CmmFilterDTO filter) {
         Objects.requireNonNull(items, "Items must not be null");
 
-        CmmPagination.of(pageIndex, pageSize, 0, items.size());
+        CmmPaginationDTO.of(pageIndex, pageSize, 0, items.size());
 
         long offset = (long) (pageIndex - 1) * pageSize;
         int start = (int) Math.min(offset, items.size());
@@ -39,10 +39,10 @@ public record CmmListResponse<T>(
     }
 
     /** 저장소에서 이미 페이징한 목록을 다시 자르지 않고 감싼다. */
-    public static <T> CmmListResponse<T> fromPage(
-            List<T> items, long totalCnt, int pageIndex, int pageSize, CmmFilter filter) {
+    public static <T> CmmListResDTO<T> fromPage(
+            List<T> items, long totalCnt, int pageIndex, int pageSize, CmmFilterDTO filter) {
         Objects.requireNonNull(items, "Items must not be null");
 
-        return new CmmListResponse<>(CmmPagination.of(pageIndex, pageSize, items.size(), totalCnt), filter, items);
+        return new CmmListResDTO<>(CmmPaginationDTO.of(pageIndex, pageSize, items.size(), totalCnt), filter, items);
     }
 }

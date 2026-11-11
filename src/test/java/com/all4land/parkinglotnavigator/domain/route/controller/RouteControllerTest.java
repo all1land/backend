@@ -5,7 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
+import com.all4land.parkinglotnavigator.domain.route.dto.RouteResDTO;
 import com.all4land.parkinglotnavigator.domain.route.service.RouteService;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
@@ -41,7 +41,7 @@ class RouteControllerTest {
     void delegatesCoordinatesAndReturnsCommonResponse() throws Exception {
         // HTTP 응답 형식 확인용 결과이며 실제 경로 데이터는 아니다.
         when(routeService.route(37.5586, 126.8377, 37.5585, 126.8376, 1L, 37.5673, 126.8270))
-                .thenReturn(new RouteResponse(List.of(), 0, 0));
+                .thenReturn(new RouteResDTO(List.of(), 0, 0));
 
         mockMvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content(REQUEST))
                 .andExpect(status().isOk())

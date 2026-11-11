@@ -85,7 +85,7 @@ class GlobalExceptionHandlerTest {
         }
 
         @PostMapping("/test/valid")
-        void valid(@Valid @RequestBody NameRequest request) {}
+        void valid(@Valid @RequestBody NameReqDTO request) {}
 
         @GetMapping("/test/unexpected")
         void unexpected() {
@@ -93,5 +93,5 @@ class GlobalExceptionHandlerTest {
         }
     }
 
-    record NameRequest(@NotBlank String name) {}
+    record NameReqDTO(@NotBlank String name) {}
 }

@@ -1,6 +1,6 @@
 package com.all4land.parkinglotnavigator.global.exception;
 
-import com.all4land.parkinglotnavigator.global.response.ApiResponse;
+import com.all4land.parkinglotnavigator.global.response.ApiResDTO;
 import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import com.all4land.parkinglotnavigator.swagger.ErrorApi;
 import jakarta.servlet.RequestDispatcher;
@@ -21,7 +21,7 @@ public class ApiErrorController implements ErrorController, ErrorApi {
 
     @Override
     @RequestMapping("/error")
-    public ResponseEntity<ApiResponse<Void>> handleError(HttpServletRequest request) {
+    public ResponseEntity<ApiResDTO<Void>> handleError(HttpServletRequest request) {
         EnCmmErrCode errorCode = toErrorCode(request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE));
         Object exception = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
         log.warn(

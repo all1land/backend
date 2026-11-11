@@ -1,7 +1,7 @@
 package com.all4land.parkinglotnavigator.domain.route.walkingroute.service;
 
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.WalkingRouteProperties;
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegment;
+import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegmentDTO;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.repository.WalkingRouteRepository;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.repository.WalkingRouteRepository.PathPart;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.repository.WalkingRouteRepository.SnappedPoint;
@@ -39,7 +39,7 @@ public class WalkingRouteService {
      * @throws BusinessException 출발지/도착지 근처에 보행 링크가 없거나({@link EnRouteErrCode#WALK_LINK_NOT_NEARBY}), 두
      *     지점이 네트워크로 이어지지 않을 때({@link EnRouteErrCode#WALKING_ROUTE_NOT_FOUND})
      */
-    public List<WalkingRouteSegment> route(double startLat, double startLng, double endLat, double endLng) {
+    public List<WalkingRouteSegmentDTO> route(double startLat, double startLng, double endLat, double endLng) {
         if (startLat == endLat && startLng == endLng) {
             return List.of();
         }
@@ -53,7 +53,7 @@ public class WalkingRouteService {
             throw new BusinessException(EnRouteErrCode.WALKING_ROUTE_NOT_FOUND);
         }
 
-        List<WalkingRouteSegment> segments = new ArrayList<>();
+        List<WalkingRouteSegmentDTO> segments = new ArrayList<>();
         addAccessSegment(segments, startLng, startLat, start.lng(), start.lat(), start.distanceMeters());
         path.forEach(part -> segments.add(segment(part.coordinates(), part.distanceMeters())));
         addAccessSegment(segments, end.lng(), end.lat(), endLng, endLat, end.distanceMeters());
@@ -69,7 +69,7 @@ public class WalkingRouteService {
 
     // 접근 구간: 원래 좌표와 보행 링크 위 투영점을 잇는 직선 구간. 원래 좌표가 이미 링크 위에 있으면 붙이지 않는다.
     private void addAccessSegment(
-            List<WalkingRouteSegment> segments,
+            List<WalkingRouteSegmentDTO> segments,
             double fromLng,
             double fromLat,
             double toLng,
@@ -81,10 +81,10 @@ public class WalkingRouteService {
         }
     }
 
-    private WalkingRouteSegment segment(List<double[]> coordinates, double distanceMeters) {
+    private WalkingRouteSegmentDTO segment(List<double[]> coordinates, double distanceMeters) {
         double[] first = coordinates.getFirst();
         double[] last = coordinates.getLast();
-        return new WalkingRouteSegment(
+        return new WalkingRouteSegmentDTO(
                 first[1],
                 first[0],
                 last[1],

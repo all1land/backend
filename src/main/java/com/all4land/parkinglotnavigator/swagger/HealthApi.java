@@ -1,6 +1,6 @@
 package com.all4land.parkinglotnavigator.swagger;
 
-import com.all4land.parkinglotnavigator.global.response.ApiResponse;
+import com.all4land.parkinglotnavigator.global.response.ApiResDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,5 +13,5 @@ public interface HealthApi {
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "정상 (COMMON_200_001)")
     })
-    ApiResponse<Map<String, String>> health();
+    ApiResDTO<Map<String, String>> health();
 }

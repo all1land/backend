@@ -4,16 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record TmapPoiResponse(SearchPoiInfo searchPoiInfo) {
+public record TmapPoiResDTO(SearchPoiInfoDTO searchPoiInfo) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record SearchPoiInfo(Integer totalCount, Pois pois) {}
+    public record SearchPoiInfoDTO(Integer totalCount, PoisDTO pois) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record Pois(List<Poi> poi) {}
+    public record PoisDTO(List<PoiDTO> poi) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record Poi(
+    public record PoiDTO(
             String id,
             String name,
             String noorLat,
@@ -29,11 +29,11 @@ public record TmapPoiResponse(SearchPoiInfo searchPoiInfo) {
             String roadName,
             String firstBuildNo,
             String secondBuildNo,
-            NewAddressList newAddressList) {}
+            NewAddressListDTO newAddressList) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record NewAddressList(List<NewAddress> newAddress) {}
+    public record NewAddressListDTO(List<NewAddressDTO> newAddress) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record NewAddress(String fullAddressRoad) {}
+    public record NewAddressDTO(String fullAddressRoad) {}
 }

@@ -1,9 +1,9 @@
 package com.all4land.parkinglotnavigator.domain.route.controller;
 
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteCoordinateRequest;
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
+import com.all4land.parkinglotnavigator.domain.route.dto.RouteCrdReqDTO;
+import com.all4land.parkinglotnavigator.domain.route.dto.RouteResDTO;
 import com.all4land.parkinglotnavigator.domain.route.service.RouteService;
-import com.all4land.parkinglotnavigator.global.response.ApiResponse;
+import com.all4land.parkinglotnavigator.global.response.ApiResDTO;
 import com.all4land.parkinglotnavigator.global.response.EnCmmScssCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +20,9 @@ public class RouteController {
     private final RouteService routeService;
 
     @PostMapping("/all")
-    public ApiResponse<RouteResponse> routeByCoordinates(@Valid @RequestBody RouteCoordinateRequest request) {
+    public ApiResDTO<RouteResDTO> routeByCoordinates(@Valid @RequestBody RouteCrdReqDTO request) {
 
-        RouteResponse response = routeService.route(
+        RouteResDTO response = routeService.route(
                 request.origin().latitude(),
                 request.origin().longitude(),
                 request.departurePoi().latitude(),
@@ -31,6 +31,6 @@ public class RouteController {
                 request.destination().latitude(),
                 request.destination().longitude());
 
-        return ApiResponse.success(EnCmmScssCode.OK, response);
+        return ApiResDTO.success(EnCmmScssCode.OK, response);
     }
 }

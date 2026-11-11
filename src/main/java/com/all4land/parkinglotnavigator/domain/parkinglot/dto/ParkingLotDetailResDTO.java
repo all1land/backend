@@ -3,7 +3,7 @@ package com.all4land.parkinglotnavigator.domain.parkinglot.dto;
 import com.all4land.parkinglotnavigator.domain.parkinglot.repository.ParkingLotDetailProjection;
 import java.time.LocalTime;
 
-public record ParkingLotDetailResponse(
+public record ParkingLotDetailResDTO(
         Long id,
         String name,
         String categoryCode,
@@ -36,9 +36,9 @@ public record ParkingLotDetailResponse(
         Double latitude,
         Double longitude) {
 
-    public static ParkingLotDetailResponse from(ParkingLotDetailProjection parkingLot) {
+    public static ParkingLotDetailResDTO from(ParkingLotDetailProjection parkingLot) {
 
-        return new ParkingLotDetailResponse(
+        return new ParkingLotDetailResDTO(
                 parkingLot.getId(),
                 parkingLot.getName(),
                 parkingLot.getCategoryCode(),

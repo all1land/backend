@@ -5,8 +5,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationResponse;
-import com.all4land.parkinglotnavigator.domain.route.service.ParkingRecommendationService;
+import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRcmdResDTO;
+import com.all4land.parkinglotnavigator.domain.route.service.ParkingRcmdService;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import com.all4land.parkinglotnavigator.global.response.CmmErrCode;
 import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
@@ -18,8 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(ParkingRecommendationController.class)
-class ParkingRecommendationControllerTest {
+@WebMvcTest(ParkingRcmdController.class)
+class ParkingRcmdControllerTest {
 
     private static final String URL = "/api/routes/recommendations";
     private static final String REQUEST = """
@@ -36,11 +36,11 @@ class ParkingRecommendationControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ParkingRecommendationService service;
+    private ParkingRcmdService service;
 
     @Test
     void returnsCommonResponse() throws Exception {
-        when(service.recommend(any())).thenReturn(new ParkingRecommendationResponse(0, 0, List.of()));
+        when(service.recommend(any())).thenReturn(new ParkingRcmdResDTO(0, 0, List.of()));
 
         mockMvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content(REQUEST))
                 .andExpect(status().isOk())

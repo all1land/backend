@@ -2,9 +2,9 @@ package com.all4land.parkinglotnavigator.domain.route.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteSegment;
+import com.all4land.parkinglotnavigator.domain.route.dto.RouteSegmentDTO;
 import com.all4land.parkinglotnavigator.domain.route.dto.TravelMode;
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegment;
+import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegmentDTO;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -17,10 +17,10 @@ class RouteAssemblerTest {
         List<double[]> walkingCoordinates = List.of(
                 new double[] {126.8170, 37.5660}, new double[] {126.8171, 37.5662}, new double[] {126.8173, 37.5663});
 
-        WalkingRouteSegment walking =
-                new WalkingRouteSegment(37.5660, 126.8170, 37.5663, 126.8173, 50, 45, walkingCoordinates);
+        WalkingRouteSegmentDTO walking =
+                new WalkingRouteSegmentDTO(37.5660, 126.8170, 37.5663, 126.8173, 50, 45, walkingCoordinates);
 
-        RouteSegment driving = new RouteSegment(
+        RouteSegmentDTO driving = new RouteSegmentDTO(
                 99, TravelMode.DRIVING, 1000, 120, List.of(new double[] {126.8173, 37.5663}, new double[] {
                     126.8270, 37.5670
                 }));

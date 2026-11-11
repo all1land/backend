@@ -1,6 +1,6 @@
 package com.all4land.parkinglotnavigator.swagger;
 
-import com.all4land.parkinglotnavigator.global.response.ApiResponse;
+import com.all4land.parkinglotnavigator.global.response.ApiResDTO;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +10,6 @@ import org.springframework.http.ResponseEntity;
 @Hidden
 public interface ErrorApi {
 
-    @Operation(summary = "에러 디스패치 응답", description = "예외 처리기가 닿지 않는 곳(서블릿 필터 등)에서 난 에러를 ApiResponse 형식으로 응답한다.")
-    ResponseEntity<ApiResponse<Void>> handleError(HttpServletRequest request);
+    @Operation(summary = "에러 디스패치 응답", description = "예외 처리기가 닿지 않는 곳(서블릿 필터 등)에서 난 에러를 ApiResDTO 형식으로 응답한다.")
+    ResponseEntity<ApiResDTO<Void>> handleError(HttpServletRequest request);
 }

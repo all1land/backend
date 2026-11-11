@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 /** 차량 경로의 한 구간. 모든 좌표는 WGS84(EPSG:4326). */
-public record DrivingRouteSegment(
+public record DrivingRouteSegmentDTO(
         @Schema(description = "구간 시작 위도", example = "37.5585")
         double startLat,
 

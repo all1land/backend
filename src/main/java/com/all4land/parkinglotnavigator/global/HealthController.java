@@ -1,6 +1,6 @@
 package com.all4land.parkinglotnavigator.global;
 
-import com.all4land.parkinglotnavigator.global.response.ApiResponse;
+import com.all4land.parkinglotnavigator.global.response.ApiResDTO;
 import com.all4land.parkinglotnavigator.global.response.EnCmmScssCode;
 import com.all4land.parkinglotnavigator.swagger.HealthApi;
 import java.util.Map;
@@ -12,7 +12,7 @@ public class HealthController implements HealthApi {
 
     @Override
     @GetMapping("/health")
-    public ApiResponse<Map<String, String>> health() {
-        return ApiResponse.success(EnCmmScssCode.OK, Map.of("health", "UP"));
+    public ApiResDTO<Map<String, String>> health() {
+        return ApiResDTO.success(EnCmmScssCode.OK, Map.of("health", "UP"));
     }
 }

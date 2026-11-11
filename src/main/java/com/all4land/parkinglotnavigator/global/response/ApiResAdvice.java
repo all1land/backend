@@ -8,18 +8,18 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-// 컨트롤러는 ApiResponse만 반환하고, 실제 HTTP status는 여기서 ApiResponse.httpStatus로 일괄 설정
+// 컨트롤러는 ApiResponse만 반환하고, 실제 HTTP status는 여기서 ApiResDTO.httpStatus로 일괄 설정
 @ControllerAdvice
-public class ApiResponseAdvice implements ResponseBodyAdvice<ApiResponse<?>> {
+public class ApiResAdvice implements ResponseBodyAdvice<ApiResDTO<?>> {
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return ApiResponse.class.isAssignableFrom(returnType.getParameterType());
+        return ApiResDTO.class.isAssignableFrom(returnType.getParameterType());
     }
 
     @Override
-    public ApiResponse<?> beforeBodyWrite(
-            ApiResponse<?> body,
+    public ApiResDTO<?> beforeBodyWrite(
+            ApiResDTO<?> body,
             MethodParameter returnType,
             MediaType selectedContentType,
             Class<? extends HttpMessageConverter<?>> selectedConverterType,

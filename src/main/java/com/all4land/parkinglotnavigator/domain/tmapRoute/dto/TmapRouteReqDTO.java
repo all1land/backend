@@ -5,7 +5,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 
-public record TmapRouteRequest(
+public record TmapRouteReqDTO(
         @Schema(description = "출발지 위도", example = "37.5509") @NotNull @DecimalMin("-90") @DecimalMax("90") Double startLat,
 
         @Schema(description = "출발지 경도", example = "126.8495") @NotNull @DecimalMin("-180") @DecimalMax("180") Double startLng,

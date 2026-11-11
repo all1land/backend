@@ -1,11 +1,11 @@
 package com.all4land.parkinglotnavigator.domain.place.service;
 
-import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListRequest;
-import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResponse;
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListReqDTO;
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResDTO;
 import com.all4land.parkinglotnavigator.domain.place.repository.PlaceRepository;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
-import com.all4land.parkinglotnavigator.global.response.CmmFilter;
-import com.all4land.parkinglotnavigator.global.response.CmmListResponse;
+import com.all4land.parkinglotnavigator.global.response.CmmFilterDTO;
+import com.all4land.parkinglotnavigator.global.response.CmmListResDTO;
 import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import jakarta.validation.Validator;
 import java.util.LinkedHashMap;
@@ -24,17 +24,17 @@ public class PlaceService {
     private final Validator validator;
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
-    public CmmListResponse<PlaceResponse> getPlaces(PlaceListRequest request) {
+    public CmmListResDTO<PlaceResDTO> getPlaces(PlaceListReqDTO request) {
         if (request == null || !validator.validate(request).isEmpty()) {
             throw new BusinessException(EnCmmErrCode.VALIDATION_ERROR, "장소 조회 영역과 검색 조건을 확인해주세요.");
         }
         long total = placeRepository.countInBounds(request);
-        List<PlaceResponse> items = total == 0 ? List.of() : placeRepository.findInBounds(request);
-        return CmmListResponse.fromPage(
+        List<PlaceResDTO> items = total == 0 ? List.of() : placeRepository.findInBounds(request);
+        return CmmListResDTO.fromPage(
                 items, total, request.getPageIndex(), request.getPageSize(), appliedFilter(request));
     }
 
-    private CmmFilter appliedFilter(PlaceListRequest request) {
+    private CmmFilterDTO appliedFilter(PlaceListReqDTO request) {
         Map<String, Object> values = new LinkedHashMap<>();
         values.put("keyword", request.getKeyword());
         values.put("minLat", request.getMinLat());
@@ -46,6 +46,6 @@ public class PlaceService {
         if (request.getZoom() != null) {
             values.put("zoom", request.getZoom());
         }
-        return new CmmFilter(values);
+        return new CmmFilterDTO(values);
     }
 }

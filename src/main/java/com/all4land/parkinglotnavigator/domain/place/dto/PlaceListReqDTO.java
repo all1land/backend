@@ -15,7 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Schema(description = "DB 장소의 지도 영역·검색 조건·페이지 요청")
-public class PlaceListRequest {
+public class PlaceListReqDTO {
 
     @Schema(description = "현재 페이지 (1부터 시작)", defaultValue = "1")
     @Min(1) private int pageIndex = 1;

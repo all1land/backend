@@ -2,9 +2,9 @@ package com.all4land.parkinglotnavigator.domain.route.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegment;
+import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegmentDTO;
 import com.all4land.parkinglotnavigator.domain.route.dto.TravelMode;
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegment;
+import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegmentDTO;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +19,7 @@ class RouteAssemblerDrivingTest {
 
         var converted = assembler.driving(List.of(
                 drivingSegment(10, 9, new double[] {126.8170, 37.5660}, new double[] {126.8171, 37.5661}),
-                new DrivingRouteSegment(37.5661, 126.8171, 37.5668, 126.8180, 100, 12, roadCoordinates),
+                new DrivingRouteSegmentDTO(37.5661, 126.8171, 37.5668, 126.8180, 100, 12, roadCoordinates),
                 drivingSegment(20, 18, new double[] {126.8180, 37.5668}, new double[] {126.8181, 37.5669})));
 
         assertEquals(
@@ -137,15 +137,15 @@ class RouteAssemblerDrivingTest {
         }
     }
 
-    private static DrivingRouteSegment drivingSegment(
+    private static DrivingRouteSegmentDTO drivingSegment(
             int distanceMeters, int durationSeconds, double[] start, double[] end) {
-        return new DrivingRouteSegment(
+        return new DrivingRouteSegmentDTO(
                 start[1], start[0], end[1], end[0], distanceMeters, durationSeconds, List.of(start, end));
     }
 
-    private static WalkingRouteSegment walkingSegment(
+    private static WalkingRouteSegmentDTO walkingSegment(
             int distanceMeters, int durationSeconds, double[] start, double[] end) {
-        return new WalkingRouteSegment(
+        return new WalkingRouteSegmentDTO(
                 start[1], start[0], end[1], end[0], distanceMeters, durationSeconds, List.of(start, end));
     }
 }

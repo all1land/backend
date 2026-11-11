@@ -11,8 +11,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.all4land.parkinglotnavigator.domain.external.tmap.TmapClient;
-import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteRequest;
-import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteResponse;
+import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteReqDTO;
+import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteResDTO;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ import org.springframework.web.client.RestClient;
 class TmapRouteServiceTest {
 
     private static final String BASE_URL = "https://apis.openapi.sk.com";
-    private static final TmapRouteRequest REQUEST = new TmapRouteRequest(37.5509, 126.8495, 37.5583, 126.8389);
+    private static final TmapRouteReqDTO REQUEST = new TmapRouteReqDTO(37.5509, 126.8495, 37.5583, 126.8389);
 
     // Tmap 문서의 응답 예시 형태: 출발지 Point(요약 포함) → LineString 구간들 → 도착지 Point
     private static final String ROUTE_JSON = """
@@ -70,7 +70,7 @@ class TmapRouteServiceTest {
                 .andExpect(jsonPath("$.startName").doesNotExist())
                 .andRespond(withSuccess(ROUTE_JSON, MediaType.APPLICATION_JSON));
 
-        TmapRouteResponse route = tmapRouteService.driving(REQUEST);
+        TmapRouteResDTO route = tmapRouteService.driving(REQUEST);
 
         assertThat(route.distanceMeters()).isEqualTo(1520);
         assertThat(route.durationSeconds()).isEqualTo(420);

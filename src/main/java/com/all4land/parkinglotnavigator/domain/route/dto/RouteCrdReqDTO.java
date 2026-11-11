@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-public record RouteCoordinateRequest(
-        @NotNull @Valid RouteCoordinate origin,
-        @NotNull @Valid RouteCoordinate departurePoi,
+public record RouteCrdReqDTO(
+        @NotNull @Valid RouteCrdDTO origin,
+        @NotNull @Valid RouteCrdDTO departurePoi,
         @NotNull @Positive Long parkingId,
-        @NotNull @Valid RouteCoordinate destination) {}
+        @NotNull @Valid RouteCrdDTO destination) {}

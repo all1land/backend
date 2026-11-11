@@ -1,7 +1,7 @@
 package com.all4land.parkinglotnavigator.domain.place.repository;
 
-import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListRequest;
-import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResponse;
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListReqDTO;
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResDTO;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -40,18 +40,18 @@ public class PlaceRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public long countInBounds(PlaceListRequest request) {
+    public long countInBounds(PlaceListReqDTO request) {
         return jdbcTemplate.queryForObject("SELECT count(*) " + CONDITIONS, parameters(request), Long.class);
     }
 
-    public List<PlaceResponse> findInBounds(PlaceListRequest request) {
+    public List<PlaceResDTO> findInBounds(PlaceListReqDTO request) {
         var parameters = new MapSqlParameterSource(parameters(request))
                 .addValue("limit", request.getPageSize())
                 .addValue("offset", (long) (request.getPageIndex() - 1) * request.getPageSize());
         return jdbcTemplate.query(
                 LIST_SQL,
                 parameters,
-                (rs, rowNum) -> new PlaceResponse(
+                (rs, rowNum) -> new PlaceResDTO(
                         rs.getString("poi_id"),
                         rs.getString("name"),
                         rs.getString("category_code"),
@@ -65,7 +65,7 @@ public class PlaceRepository {
                         rs.getObject("entrance_longitude", Double.class)));
     }
 
-    private Map<String, Object> parameters(PlaceListRequest request) {
+    private Map<String, Object> parameters(PlaceListReqDTO request) {
         return Map.of(
                 "minLat",
                 request.getMinLat(),

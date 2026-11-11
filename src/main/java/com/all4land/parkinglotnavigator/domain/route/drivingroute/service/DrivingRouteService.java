@@ -1,7 +1,7 @@
 package com.all4land.parkinglotnavigator.domain.route.drivingroute.service;
 
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.DrivingRouteProperties;
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegment;
+import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegmentDTO;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.DrivingRouteRepository;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.DrivingRouteRepository.DriveCost;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.repository.DrivingRouteRepository.PathPart;
@@ -44,7 +44,7 @@ public class DrivingRouteService {
      * @throws BusinessException 출발지/도착지 근처에 차량 도로가 없거나({@link EnRouteErrCode#ROAD_LINK_NOT_NEARBY}), 두
      *     지점이 네트워크로 이어지지 않을 때({@link EnRouteErrCode#DRIVING_ROUTE_NOT_FOUND})
      */
-    public List<DrivingRouteSegment> route(double startLat, double startLng, double endLat, double endLng) {
+    public List<DrivingRouteSegmentDTO> route(double startLat, double startLng, double endLat, double endLng) {
         if (startLat == endLat && startLng == endLng) {
             return List.of();
         }
@@ -58,7 +58,7 @@ public class DrivingRouteService {
             throw new BusinessException(EnRouteErrCode.DRIVING_ROUTE_NOT_FOUND);
         }
 
-        List<DrivingRouteSegment> segments = new ArrayList<>();
+        List<DrivingRouteSegmentDTO> segments = new ArrayList<>();
         segments.add(accessSegment(
                 startLng, startLat, best.start().lng(), best.start().lat(), best.start()));
         path.forEach(part -> segments.add(segment(part.coordinates(), part.distanceMeters(), part.durationSeconds())));
@@ -106,7 +106,7 @@ public class DrivingRouteService {
     }
 
     // 접근 구간: 원래 좌표와 도로 위 투영점을 잇는 직선 구간. 걸어서 이동한다고 본다.
-    private DrivingRouteSegment accessSegment(
+    private DrivingRouteSegmentDTO accessSegment(
             double fromLng, double fromLat, double toLng, double toLat, SnappedPoint snapped) {
         return segment(
                 List.of(new double[] {fromLng, fromLat}, new double[] {toLng, toLat}),
@@ -114,10 +114,10 @@ public class DrivingRouteService {
                 snapped.distanceMeters() / properties.accessWalkingSpeedMps());
     }
 
-    private static DrivingRouteSegment segment(List<double[]> coordinates, double distanceMeters, double seconds) {
+    private static DrivingRouteSegmentDTO segment(List<double[]> coordinates, double distanceMeters, double seconds) {
         double[] first = coordinates.getFirst();
         double[] last = coordinates.getLast();
-        return new DrivingRouteSegment(
+        return new DrivingRouteSegmentDTO(
                 first[1],
                 first[0],
                 last[1],

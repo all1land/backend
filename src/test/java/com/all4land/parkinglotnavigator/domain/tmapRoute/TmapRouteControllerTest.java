@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteResponse;
+import com.all4land.parkinglotnavigator.domain.tmapRoute.dto.TmapRouteResDTO;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class TmapRouteControllerTest {
     @Test
     void drivingReturnsRoute() throws Exception {
         given(tmapRouteService.driving(any()))
-                .willReturn(new TmapRouteResponse(1520, 420, List.of(new double[] {126.8495, 37.5509})));
+                .willReturn(new TmapRouteResDTO(1520, 420, List.of(new double[] {126.8495, 37.5509})));
 
         mockMvc.perform(get("/api/routes/tmap/driving")
                         .param("startLat", "37.5509")

@@ -7,10 +7,10 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-public record ParkingRecommendationRequest(
-        @NotNull @Valid RouteCoordinate origin,
-        @NotNull @Valid RouteCoordinate departurePoi,
-        @NotNull @Valid RouteCoordinate destination,
+public record ParkingRcmdReqDTO(
+        @NotNull @Valid RouteCrdDTO origin,
+        @NotNull @Valid RouteCrdDTO departurePoi,
+        @NotNull @Valid RouteCrdDTO destination,
 
         @NotNull @DecimalMin(value = "0", inclusive = false) @DecimalMax("5000") Double radius,
 

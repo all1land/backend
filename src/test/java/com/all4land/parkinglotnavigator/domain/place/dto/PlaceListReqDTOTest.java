@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanWrapperImpl;
 
-class PlaceListRequestTest {
+class PlaceListReqDTOTest {
 
     private static ValidatorFactory factory;
     private static Validator validator;
@@ -71,7 +71,7 @@ class PlaceListRequestTest {
 
     @Test
     void requiresBoundsAndRejectsReversedOrNonFiniteBounds() {
-        assertThat(validator.validate(new PlaceListRequest()))
+        assertThat(validator.validate(new PlaceListReqDTO()))
                 .extracting(v -> v.getPropertyPath().toString())
                 .contains("minLat", "minLon", "maxLat", "maxLon");
         var request = validRequest();
@@ -110,8 +110,8 @@ class PlaceListRequestTest {
         assertThat(validator.validate(request)).isEmpty();
     }
 
-    private PlaceListRequest validRequest() {
-        var request = new PlaceListRequest();
+    private PlaceListReqDTO validRequest() {
+        var request = new PlaceListReqDTO();
         request.setMinLat(37.55);
         request.setMinLon(126.82);
         request.setMaxLat(37.58);

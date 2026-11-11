@@ -1,6 +1,6 @@
 package com.all4land.parkinglotnavigator.domain.parkinglot.dto;
 
-public record ParkingLotNearbyResponse(
+public record ParkingLotNearbyResDTO(
         Long id,
         String name,
         String roadNameAddress,

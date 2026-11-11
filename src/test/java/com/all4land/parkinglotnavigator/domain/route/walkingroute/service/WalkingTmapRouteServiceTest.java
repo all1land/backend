@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.WalkingRouteProperties;
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegment;
+import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegmentDTO;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import java.util.List;
@@ -44,7 +44,7 @@ class WalkingTmapRouteServiceTest {
 
     @Test
     void routeStartsAtOriginEndsAtDestinationAndIsContinuous() {
-        List<WalkingRouteSegment> segments = route(SINBANGHWA_LAT, SINBANGHWA_LNG, GAEHWA_LAT, GAEHWA_LNG);
+        List<WalkingRouteSegmentDTO> segments = route(SINBANGHWA_LAT, SINBANGHWA_LNG, GAEHWA_LAT, GAEHWA_LNG);
 
         assertConnects(segments, SINBANGHWA_LAT, SINBANGHWA_LNG, GAEHWA_LAT, GAEHWA_LNG);
         // 네트워크 경로 2,731.4m + 양 끝 접근 구간 약 18m, 37m
@@ -54,7 +54,7 @@ class WalkingTmapRouteServiceTest {
     @Test
     void reverseRouteHasSameDistance() {
         int forward = totalDistance(route(SINBANGHWA_LAT, SINBANGHWA_LNG, GAEHWA_LAT, GAEHWA_LNG));
-        List<WalkingRouteSegment> reverse = route(GAEHWA_LAT, GAEHWA_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
+        List<WalkingRouteSegmentDTO> reverse = route(GAEHWA_LAT, GAEHWA_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
 
         assertConnects(reverse, GAEHWA_LAT, GAEHWA_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
         // 구간별 반올림 오차만 허용
@@ -63,10 +63,10 @@ class WalkingTmapRouteServiceTest {
 
     @Test
     void segmentDistanceMatchesGeometryAndDurationMatchesSpeed() {
-        List<WalkingRouteSegment> segments = route(SINBANGHWA_LAT, SINBANGHWA_LNG, GAEHWA_LAT, GAEHWA_LNG);
+        List<WalkingRouteSegmentDTO> segments = route(SINBANGHWA_LAT, SINBANGHWA_LNG, GAEHWA_LAT, GAEHWA_LNG);
 
         SoftAssertions softly = new SoftAssertions();
-        for (WalkingRouteSegment segment : segments) {
+        for (WalkingRouteSegmentDTO segment : segments) {
             double geometryLength = length(segment.coordinates());
             softly.assertThat((double) segment.distanceMeters())
                     .as("구간 거리 vs 좌표 길이")
@@ -85,7 +85,7 @@ class WalkingTmapRouteServiceTest {
         double[] near = pointOnLink((long) link.get("id"), 0.3);
         double[] far = pointOnLink((long) link.get("id"), 0.7);
 
-        List<WalkingRouteSegment> segments = route(near[1], near[0], far[1], far[0]);
+        List<WalkingRouteSegmentDTO> segments = route(near[1], near[0], far[1], far[0]);
 
         assertConnects(segments, near[1], near[0], far[1], far[0]);
         assertThat(totalDistance(segments)).isCloseTo((int) Math.round(length * 0.4), within(2));
@@ -99,7 +99,7 @@ class WalkingTmapRouteServiceTest {
         double[] far = pointOnLink((long) link.get("id"), 0.7);
 
         // 링크 저장 방향(0 → 1)과 반대로 0.7 지점에서 0.3 지점으로 걷는다.
-        List<WalkingRouteSegment> segments = route(far[1], far[0], near[1], near[0]);
+        List<WalkingRouteSegmentDTO> segments = route(far[1], far[0], near[1], near[0]);
 
         assertConnects(segments, far[1], far[0], near[1], near[0]);
         assertThat(totalDistance(segments)).isCloseTo((int) Math.round(length * 0.4), within(2));
@@ -107,7 +107,7 @@ class WalkingTmapRouteServiceTest {
 
     @Test
     void samePointReturnsEmptyRoute() {
-        List<WalkingRouteSegment> segments = route(SINBANGHWA_LAT, SINBANGHWA_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
+        List<WalkingRouteSegmentDTO> segments = route(SINBANGHWA_LAT, SINBANGHWA_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
 
         assertThat(segments).isEmpty();
     }
@@ -150,7 +150,7 @@ class WalkingTmapRouteServiceTest {
             double lng = (double) lot.get("lng");
             double straight = haversine(SINBANGHWA_LNG, SINBANGHWA_LAT, lng, lat);
             for (boolean outbound : new boolean[] {true, false}) {
-                List<WalkingRouteSegment> segments = outbound
+                List<WalkingRouteSegmentDTO> segments = outbound
                         ? route(SINBANGHWA_LAT, SINBANGHWA_LNG, lat, lng)
                         : route(lat, lng, SINBANGHWA_LAT, SINBANGHWA_LNG);
                 String label = lot.get("name") + (outbound ? " 가는 길" : " 오는 길");
@@ -163,13 +163,13 @@ class WalkingTmapRouteServiceTest {
         softly.assertAll();
     }
 
-    private List<WalkingRouteSegment> route(double startLat, double startLng, double endLat, double endLng) {
+    private List<WalkingRouteSegmentDTO> route(double startLat, double startLng, double endLat, double endLng) {
         return walkingRouteService.route(startLat, startLng, endLat, endLng);
     }
 
     // 첫 구간은 출발지에서 시작, 마지막 구간은 도착지에서 끝, 구간끼리 끊김 없음, 각 구간 coordinates 양 끝 = 시작/끝 필드
     private static void assertConnects(
-            List<WalkingRouteSegment> segments, double startLat, double startLng, double endLat, double endLng) {
+            List<WalkingRouteSegmentDTO> segments, double startLat, double startLng, double endLat, double endLng) {
         assertThat(segments).isNotEmpty();
         assertThat(segments.getFirst().startLat()).isCloseTo(startLat, within(1e-9));
         assertThat(segments.getFirst().startLng()).isCloseTo(startLng, within(1e-9));
@@ -177,13 +177,13 @@ class WalkingTmapRouteServiceTest {
         assertThat(segments.getLast().endLng()).isCloseTo(endLng, within(1e-9));
 
         for (int i = 0; i + 1 < segments.size(); i++) {
-            WalkingRouteSegment current = segments.get(i);
-            WalkingRouteSegment next = segments.get(i + 1);
+            WalkingRouteSegmentDTO current = segments.get(i);
+            WalkingRouteSegmentDTO next = segments.get(i + 1);
             assertThat(next.startLat()).as("구간 %d → %d 이어짐", i, i + 1).isCloseTo(current.endLat(), within(1e-9));
             assertThat(next.startLng()).as("구간 %d → %d 이어짐", i, i + 1).isCloseTo(current.endLng(), within(1e-9));
         }
 
-        for (WalkingRouteSegment segment : segments) {
+        for (WalkingRouteSegmentDTO segment : segments) {
             assertThat(segment.coordinates()).hasSizeGreaterThanOrEqualTo(2);
             assertThat(segment.coordinates().getFirst()).containsExactly(segment.startLng(), segment.startLat());
             assertThat(segment.coordinates().getLast()).containsExactly(segment.endLng(), segment.endLat());
@@ -196,8 +196,10 @@ class WalkingTmapRouteServiceTest {
                         .isEqualTo(expected));
     }
 
-    private static int totalDistance(List<WalkingRouteSegment> segments) {
-        return segments.stream().mapToInt(WalkingRouteSegment::distanceMeters).sum();
+    private static int totalDistance(List<WalkingRouteSegmentDTO> segments) {
+        return segments.stream()
+                .mapToInt(WalkingRouteSegmentDTO::distanceMeters)
+                .sum();
     }
 
     // 가장 큰 연결 요소에 속한 200m 이상 직선에 가까운 보행 링크 하나

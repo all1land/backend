@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ApiResponse<T> {
+public class ApiResDTO<T> {
 
     private final boolean success;
     private final String code;
@@ -23,20 +23,20 @@ public class ApiResponse<T> {
     @JsonIgnore
     private final HttpStatus httpStatus;
 
-    public static <T> ApiResponse<T> success(CmmScssCode sc, T data) {
-        return new ApiResponse<>(true, sc.getCode(), sc.getMessage(), data, List.of(), sc.getHttpStatus());
+    public static <T> ApiResDTO<T> success(CmmScssCode sc, T data) {
+        return new ApiResDTO<>(true, sc.getCode(), sc.getMessage(), data, List.of(), sc.getHttpStatus());
     }
 
-    public static ApiResponse<Void> success(CmmScssCode sc) {
+    public static ApiResDTO<Void> success(CmmScssCode sc) {
         return success(sc, null);
     }
 
-    public static ApiResponse<Void> fail(CmmErrCode ec) {
+    public static ApiResDTO<Void> fail(CmmErrCode ec) {
         return fail(ec, List.of());
     }
 
-    public static ApiResponse<Void> fail(CmmErrCode ec, List<String> errorDetail) {
-        return new ApiResponse<>(
+    public static ApiResDTO<Void> fail(CmmErrCode ec, List<String> errorDetail) {
+        return new ApiResDTO<>(
                 false, ec.getCode(), ec.getMessage(), null, List.copyOf(errorDetail), ec.getHttpStatus());
     }
 }

@@ -1,9 +1,9 @@
 package com.all4land.parkinglotnavigator.swagger;
 
-import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListRequest;
-import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResponse;
-import com.all4land.parkinglotnavigator.global.response.ApiResponse;
-import com.all4land.parkinglotnavigator.global.response.CmmListResponse;
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListReqDTO;
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResDTO;
+import com.all4land.parkinglotnavigator.global.response.ApiResDTO;
+import com.all4land.parkinglotnavigator.global.response.CmmListResDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -59,7 +59,7 @@ public interface PlaceApi {
                 content =
                         @Content(
                                 mediaType = "application/json",
-                                schema = @Schema(implementation = ApiResponse.class),
+                                schema = @Schema(implementation = ApiResDTO.class),
                                 examples = @ExampleObject(value = """
                                 {"success": false, "code": "COMMON_400_002", "message": "요청 값 검증에 실패했습니다.",
                                  "data": null, "errorDetail": ["minLat: 널이어서는 안됩니다"]}
@@ -67,8 +67,7 @@ public interface PlaceApi {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
                 responseCode = "500",
                 description = "서버 오류 (COMMON_500_001)",
-                content =
-                        @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResDTO.class)))
     })
-    ApiResponse<CmmListResponse<PlaceResponse>> getPlaces(@ParameterObject PlaceListRequest request);
+    ApiResDTO<CmmListResDTO<PlaceResDTO>> getPlaces(@ParameterObject PlaceListReqDTO request);
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "목록 응답의 페이지 정보")
-public record CmmPagination(
+public record CmmPaginationDTO(
         @Schema(description = "현재 페이지 (1부터 시작)", example = "1") @JsonProperty("pageIndex")
         int pageIndex,
 
@@ -20,7 +20,7 @@ public record CmmPagination(
         @Schema(description = "전체 항목 수", example = "25") @JsonProperty("totalCnt")
         long totalCnt) {
 
-    public CmmPagination {
+    public CmmPaginationDTO {
         if (pageIndex < 1 || pageSize < 1) {
             throw new IllegalArgumentException("Page index and page size must be positive");
         }
@@ -32,11 +32,11 @@ public record CmmPagination(
         }
     }
 
-    public static CmmPagination of(int pageIndex, int pageSize, int pageCnt, long totalCnt) {
+    public static CmmPaginationDTO of(int pageIndex, int pageSize, int pageCnt, long totalCnt) {
         if (pageSize < 1) {
             throw new IllegalArgumentException("Page size must be positive");
         }
-        return new CmmPagination(pageIndex, pageSize, totalPages(totalCnt, pageSize), pageCnt, totalCnt);
+        return new CmmPaginationDTO(pageIndex, pageSize, totalPages(totalCnt, pageSize), pageCnt, totalCnt);
     }
 
     private static long totalPages(long totalCnt, int pageSize) {

@@ -1,10 +1,10 @@
 package com.all4land.parkinglotnavigator.domain.route.service;
 
-import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegment;
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteSegment;
+import com.all4land.parkinglotnavigator.domain.route.drivingroute.dto.DrivingRouteSegmentDTO;
+import com.all4land.parkinglotnavigator.domain.route.dto.RouteResDTO;
+import com.all4land.parkinglotnavigator.domain.route.dto.RouteSegmentDTO;
 import com.all4land.parkinglotnavigator.domain.route.dto.TravelMode;
-import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegment;
+import com.all4land.parkinglotnavigator.domain.route.walkingroute.dto.WalkingRouteSegmentDTO;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class RouteAssembler {
 
-    public List<RouteSegment> walking(List<WalkingRouteSegment> segments) {
+    public List<RouteSegmentDTO> walking(List<WalkingRouteSegmentDTO> segments) {
         return segments.stream()
-                .map(segment -> new RouteSegment(
+                .map(segment -> new RouteSegmentDTO(
                         0,
                         TravelMode.WALKING,
                         segment.distanceMeters(),
@@ -29,18 +29,18 @@ public class RouteAssembler {
      * 중간 차량 경로와 마지막 도로에서 주차장 마커까지의 접근 구간은 차량 구간으로 반환한다.
      * 출발지와 도착지가 같은 경우 반환되는 빈 목록은 그대로 허용한다.
      */
-    public List<RouteSegment> driving(List<DrivingRouteSegment> segments) {
+    public List<RouteSegmentDTO> driving(List<DrivingRouteSegmentDTO> segments) {
         if (segments.size() == 1) {
             throw new IllegalArgumentException("차량 경로는 빈 목록이거나 앞뒤 접근 구간을 포함해야 합니다.");
         }
 
-        List<RouteSegment> result = new ArrayList<>();
+        List<RouteSegmentDTO> result = new ArrayList<>();
 
         for (int index = 0; index < segments.size(); index++) {
-            DrivingRouteSegment segment = segments.get(index);
+            DrivingRouteSegmentDTO segment = segments.get(index);
             boolean departureAccessSegment = index == 0;
 
-            result.add(new RouteSegment(
+            result.add(new RouteSegmentDTO(
                     0,
                     departureAccessSegment ? TravelMode.WALKING : TravelMode.DRIVING,
                     segment.distanceMeters(),
@@ -51,14 +51,14 @@ public class RouteAssembler {
         return List.copyOf(result);
     }
 
-    public RouteResponse assemble(List<List<RouteSegment>> sections) {
-        List<RouteSegment> result = new ArrayList<>();
+    public RouteResDTO assemble(List<List<RouteSegmentDTO>> sections) {
+        List<RouteSegmentDTO> result = new ArrayList<>();
         long totalDistanceMeters = 0;
         long totalDurationSeconds = 0;
 
-        for (List<RouteSegment> section : sections) {
-            for (RouteSegment segment : section) {
-                result.add(new RouteSegment(
+        for (List<RouteSegmentDTO> section : sections) {
+            for (RouteSegmentDTO segment : section) {
+                result.add(new RouteSegmentDTO(
                         result.size() + 1,
                         segment.mode(),
                         segment.distanceMeters(),
@@ -70,6 +70,6 @@ public class RouteAssembler {
             }
         }
 
-        return new RouteResponse(List.copyOf(result), totalDistanceMeters, totalDurationSeconds);
+        return new RouteResDTO(List.copyOf(result), totalDistanceMeters, totalDurationSeconds);
     }
 }

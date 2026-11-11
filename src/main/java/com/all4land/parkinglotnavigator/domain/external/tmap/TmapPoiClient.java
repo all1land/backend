@@ -1,6 +1,6 @@
 package com.all4land.parkinglotnavigator.domain.external.tmap;
 
-import com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapPoiResponse;
+import com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapPoiResDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,7 +12,7 @@ public class TmapPoiClient {
 
     private final RestClient restClient;
 
-    public TmapPoiResponse search(String keyword, int page, int count) {
+    public TmapPoiResDTO search(String keyword, int page, int count) {
         var response = restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
@@ -33,11 +33,11 @@ public class TmapPoiClient {
                         .build(keyword))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .toEntity(TmapPoiResponse.class);
+                .toEntity(TmapPoiResDTO.class);
 
         // 결과 없음(204)만 빈 검색 결과로 변환한다. 200의 빈 본문은 응답 오류로 처리한다.
         if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
-            return new TmapPoiResponse(new TmapPoiResponse.SearchPoiInfo(0, null));
+            return new TmapPoiResDTO(new TmapPoiResDTO.SearchPoiInfoDTO(0, null));
         }
         return response.getBody();
     }

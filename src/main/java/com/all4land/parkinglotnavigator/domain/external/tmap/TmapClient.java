@@ -1,7 +1,7 @@
 package com.all4land.parkinglotnavigator.domain.external.tmap;
 
-import com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteRequest;
-import com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResponse;
+import com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteReqDTO;
+import com.all4land.parkinglotnavigator.domain.external.tmap.dto.TmapRouteResDTO;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import org.springframework.http.MediaType;
@@ -24,16 +24,16 @@ public class TmapClient {
         this.restClient = restClient;
     }
 
-    public TmapRouteResponse driving(double startLng, double startLat, double endLng, double endLat) {
-        return post(DRIVING_PATH, TmapRouteRequest.driving(startLng, startLat, endLng, endLat));
+    public TmapRouteResDTO driving(double startLng, double startLat, double endLng, double endLat) {
+        return post(DRIVING_PATH, TmapRouteReqDTO.driving(startLng, startLat, endLng, endLat));
     }
 
-    public TmapRouteResponse pedestrian(double startLng, double startLat, double endLng, double endLat) {
+    public TmapRouteResDTO pedestrian(double startLng, double startLat, double endLng, double endLat) {
         return post(
-                PEDESTRIAN_PATH, TmapRouteRequest.pedestrian(startLng, startLat, endLng, endLat, START_NAME, END_NAME));
+                PEDESTRIAN_PATH, TmapRouteReqDTO.pedestrian(startLng, startLat, endLng, endLat, START_NAME, END_NAME));
     }
 
-    private TmapRouteResponse post(String path, TmapRouteRequest request) {
+    private TmapRouteResDTO post(String path, TmapRouteReqDTO request) {
         return restClient
                 .post()
                 .uri(uriBuilder ->
@@ -42,6 +42,6 @@ public class TmapClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
-                .body(TmapRouteResponse.class);
+                .body(TmapRouteResDTO.class);
     }
 }

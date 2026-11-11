@@ -1,9 +1,9 @@
 package com.all4land.parkinglotnavigator.domain.route.service;
 
 import com.all4land.parkinglotnavigator.domain.parkinglot.service.ParkingLotService;
-import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationRequest;
-import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationResponse;
-import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRecommendationResponse.Item;
+import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRcmdReqDTO;
+import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRcmdResDTO;
+import com.all4land.parkinglotnavigator.domain.route.dto.ParkingRcmdResDTO.ItemDTO;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ParkingRecommendationService {
+public class ParkingRcmdService {
 
     private static final int MAX_CANDIDATES = 50;
 
@@ -28,7 +28,7 @@ public class ParkingRecommendationService {
      * 후보 경로 하나라도 실패하면 예외를 그대로 전달하며 부분 추천하지 않는다.
      * TMAP 및 실시간 주차 가능 정보는 추천 계산에 사용하지 않는다.
      */
-    public ParkingRecommendationResponse recommend(ParkingRecommendationRequest request) {
+    public ParkingRcmdResDTO recommend(ParkingRcmdReqDTO request) {
         var destination = request.destination();
 
         var candidates = parkingLotService.getNearbyParkingLots(
@@ -40,7 +40,7 @@ public class ParkingRecommendationService {
 
         var origin = request.origin();
         var departurePoi = request.departurePoi();
-        List<Item> evaluated = new ArrayList<>();
+        List<ItemDTO> evaluated = new ArrayList<>();
 
         for (var parking : candidates) {
             var route = routeService.route(
@@ -52,23 +52,23 @@ public class ParkingRecommendationService {
                     destination.latitude(),
                     destination.longitude());
 
-            evaluated.add(new Item(
+            evaluated.add(new ItemDTO(
                     0, parking.id(), parking.name(), route.totalDistanceMeters(), route.totalDurationSeconds()));
         }
 
-        evaluated.sort(Comparator.comparingLong(Item::totalDurationSeconds)
-                .thenComparingLong(Item::totalDistanceMeters)
-                .thenComparing(Item::parkingId));
+        evaluated.sort(Comparator.comparingLong(ItemDTO::totalDurationSeconds)
+                .thenComparingLong(ItemDTO::totalDistanceMeters)
+                .thenComparing(ItemDTO::parkingId));
 
         int count = Math.min(request.limit(), evaluated.size());
-        List<Item> recommendations = new ArrayList<>();
+        List<ItemDTO> recommendations = new ArrayList<>();
 
         for (int index = 0; index < count; index++) {
             var item = evaluated.get(index);
-            recommendations.add(new Item(
+            recommendations.add(new ItemDTO(
                     index + 1, item.parkingId(), item.name(), item.totalDistanceMeters(), item.totalDurationSeconds()));
         }
 
-        return new ParkingRecommendationResponse(candidates.size(), evaluated.size(), List.copyOf(recommendations));
+        return new ParkingRcmdResDTO(candidates.size(), evaluated.size(), List.copyOf(recommendations));
     }
 }

@@ -2,7 +2,7 @@ package com.all4land.parkinglotnavigator.domain.route.service;
 
 import com.all4land.parkinglotnavigator.domain.parkinglot.service.ParkingLotService;
 import com.all4land.parkinglotnavigator.domain.route.drivingroute.service.DrivingRouteService;
-import com.all4land.parkinglotnavigator.domain.route.dto.RouteResponse;
+import com.all4land.parkinglotnavigator.domain.route.dto.RouteResDTO;
 import com.all4land.parkinglotnavigator.domain.route.walkingroute.service.WalkingRouteService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class RouteService {
      * 모든 입력 좌표는 WGS84이며 인자 순서는 위도, 경도이다.
      * 출발 측 POI는 호출자가 조회하여 전달한다.
      */
-    public RouteResponse route(
+    public RouteResDTO route(
             double originLat,
             double originLng,
             double departurePoiLat,
@@ -79,7 +79,7 @@ public class RouteService {
     }
 
     private static void validateConnection(
-            RouteResponse response, double originLat, double originLng, double destinationLat, double destinationLng) {
+            RouteResDTO response, double originLat, double originLng, double destinationLat, double destinationLng) {
 
         double[] expected = {originLng, originLat};
 
