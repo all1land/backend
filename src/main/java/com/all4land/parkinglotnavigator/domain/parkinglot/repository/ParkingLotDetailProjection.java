@@ -1,5 +1,6 @@
 package com.all4land.parkinglotnavigator.domain.parkinglot.repository;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 public interface ParkingLotDetailProjection {
@@ -65,4 +66,19 @@ public interface ParkingLotDetailProjection {
     Double getLatitude();
 
     Double getLongitude();
+
+    String getExternalId();
+
+    String getDisplayAddress();
+
+    Double getEntranceLatitude();
+
+    Double getEntranceLongitude();
+
+    String getProviderCode();
+
+    String getProviderName();
+
+    LocalDate getDataReferenceDate();
+
 }

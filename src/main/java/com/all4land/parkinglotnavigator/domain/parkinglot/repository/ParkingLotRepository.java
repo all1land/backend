@@ -12,6 +12,32 @@ public interface ParkingLotRepository extends JpaRepository<ParkingLot, Long> {
         SELECT
             p.id AS id,
             p.name AS name,
+            p.external_id AS externalId,
+            COALESCE(NULLIF(BTRIM(p.road_name_address), ''), NULLIF(BTRIM(p.lot_number_address), '')) AS displayAddress,
+            p.operation_days AS operationDays,
+            p.weekday_open AS weekdayOpen,
+            p.weekday_close AS weekdayClose,
+            p.saturday_open AS saturdayOpen,
+            p.saturday_close AS saturdayClose,
+            p.holiday_open AS holidayOpen,
+            p.holiday_close AS holidayClose,
+            p.fee_info AS feeInfo,
+            p.base_minutes AS baseMinutes,
+            p.base_fee AS baseFee,
+            p.extra_unit_minutes AS extraUnitMinutes,
+            p.extra_unit_fee AS extraUnitFee,
+            p.daily_ticket_hours AS dailyTicketHours,
+            p.daily_ticket_fee AS dailyTicketFee,
+            p.monthly_pass_fee AS monthlyPassFee,
+            p.payment_method AS paymentMethod,
+            p.special_notes AS specialNotes,
+            p.management_agency AS managementAgency,
+            p.disabled_parking_yn AS disabledParkingYn,
+            p.data_reference_date AS dataReferenceDate,
+            p.provider_code AS providerCode,
+            p.provider_name AS providerName,
+            ST_Y(p.entrance_location::geometry) AS entranceLatitude,
+            ST_X(p.entrance_location::geometry) AS entranceLongitude,
             p.road_name_address AS roadNameAddress,
             p.phone AS phone,
             p.lot_number_address AS lotNumberAddress,
@@ -66,12 +92,19 @@ public interface ParkingLotRepository extends JpaRepository<ParkingLot, Long> {
         ORDER BY distance ASC
         """, nativeQuery = true)
     List<NearbyParkingLotProjection> findNearbyParkingLots(
-            @Param("latitude") Double latitude, @Param("longitude") Double longitude, @Param("radius") Double radius);
+        @Param("latitude") Double latitude, @Param("longitude") Double longitude, @Param("radius") Double radius);
 
     @Query(value = """
         SELECT
             p.id AS id,
             p.name AS name,
+            p.external_id AS externalId,
+            COALESCE(NULLIF(BTRIM(p.road_name_address), ''), NULLIF(BTRIM(p.lot_number_address), '')) AS displayAddress,
+            p.data_reference_date AS dataReferenceDate,
+            p.provider_code AS providerCode,
+            p.provider_name AS providerName,
+            ST_Y(p.entrance_location::geometry) AS entranceLatitude,
+            ST_X(p.entrance_location::geometry) AS entranceLongitude,
 
             p.category_code AS categoryCode,
             category.name AS categoryName,
