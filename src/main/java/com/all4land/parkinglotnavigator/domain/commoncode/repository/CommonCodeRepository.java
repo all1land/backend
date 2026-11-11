@@ -56,9 +56,8 @@ public class CommonCodeRepository {
         String sql = "SELECT EXISTS (SELECT 1 FROM tb_cmn_code"
                 + " WHERE parent_id IS NOT DISTINCT FROM CAST(:parentId AS BIGINT) AND code = :code"
                 + (excludedId == null ? "" : " AND id <> :excludedId") + ")";
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("parentId", parentId)
-                .addValue("code", code);
+        MapSqlParameterSource parameters =
+                new MapSqlParameterSource().addValue("parentId", parentId).addValue("code", code);
         if (excludedId != null) {
             parameters.addValue("excludedId", excludedId);
         }
@@ -73,15 +72,16 @@ public class CommonCodeRepository {
     }
 
     public boolean isReferenced(String rootCode, String code) {
-        String sql = switch (rootCode) {
-            case "PLACE_CATEGORY" -> "SELECT EXISTS (SELECT 1 FROM tb_place WHERE category_code = :code)";
-            case "PARKING_CATEGORY" ->
-                    "SELECT EXISTS (SELECT 1 FROM tb_parking_lot WHERE category_code = :code)";
-            case "PARKING_TYPE" ->
-                    "SELECT EXISTS (SELECT 1 FROM tb_parking_lot WHERE parking_type_code = :code)";
-            case "USER_ROLE" -> "SELECT EXISTS (SELECT 1 FROM tb_user WHERE role = :code)";
-            default -> null;
-        };
+        String sql =
+                switch (rootCode) {
+                    case "PLACE_CATEGORY" -> "SELECT EXISTS (SELECT 1 FROM tb_place WHERE category_code = :code)";
+                    case "PARKING_CATEGORY" ->
+                        "SELECT EXISTS (SELECT 1 FROM tb_parking_lot WHERE category_code = :code)";
+                    case "PARKING_TYPE" ->
+                        "SELECT EXISTS (SELECT 1 FROM tb_parking_lot WHERE parking_type_code = :code)";
+                    case "USER_ROLE" -> "SELECT EXISTS (SELECT 1 FROM tb_user WHERE role = :code)";
+                    default -> null;
+                };
         if (sql == null) {
             return false;
         }

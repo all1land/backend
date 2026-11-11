@@ -80,5 +80,4 @@ public interface ParkingLotDetailProjection {
     String getProviderName();
 
     LocalDate getDataReferenceDate();
-
 }

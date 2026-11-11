@@ -36,17 +36,19 @@ public class CommonCodeController {
     @Operation(summary = "최상위(root) 코드 목록", description = "parent_id가 NULL인 코드 목록. 기본적으로 ACTIVE만 조회한다.")
     @GetMapping("/roots")
     public ApiResDTO<List<CommonCodeResDTO>> getRoots(
-            @Parameter(description = "비활성 코드를 포함할지 여부")
-            @RequestParam(name = "includeInactive", defaultValue = "false") boolean includeInactive) {
+            @Parameter(description = "비활성 코드를 포함할지 여부") @RequestParam(name = "includeInactive", defaultValue = "false")
+                    boolean includeInactive) {
         return ApiResDTO.success(EnCmmScssCode.OK, commonCodeService.getRoots(includeInactive));
     }
 
-    @Operation(summary = "root 지정 시 하위 코드 목록", description = "예: GET /api/common-codes/PARKING_CATEGORY. 직계 하위 코드를 정렬 순서로 조회한다.")
+    @Operation(
+            summary = "root 지정 시 하위 코드 목록",
+            description = "예: GET /api/common-codes/PARKING_CATEGORY. 직계 하위 코드를 정렬 순서로 조회한다.")
     @GetMapping("/{rootCode}")
     public ApiResDTO<List<CommonCodeResDTO>> getChildren(
             @Parameter(description = "최상위 코드값 (예: PARKING_TYPE)") @PathVariable("rootCode") String rootCode,
-            @Parameter(description = "비활성 코드를 포함할지 여부")
-            @RequestParam(name = "includeInactive", defaultValue = "false") boolean includeInactive) {
+            @Parameter(description = "비활성 코드를 포함할지 여부") @RequestParam(name = "includeInactive", defaultValue = "false")
+                    boolean includeInactive) {
         return ApiResDTO.success(EnCmmScssCode.OK, commonCodeService.getChildren(rootCode, includeInactive));
     }
 

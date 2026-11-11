@@ -82,5 +82,4 @@ public interface NearbyParkingLotProjection {
     Double getEntranceLatitude();
 
     Double getEntranceLongitude();
-
 }

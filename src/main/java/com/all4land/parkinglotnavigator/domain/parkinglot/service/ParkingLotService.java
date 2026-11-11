@@ -20,8 +20,8 @@ public class ParkingLotService {
 
     public ParkingLotDetailResDTO getParkingLot(Long parkingLotId) {
         ParkingLotDetailProjection parkingLot = parkingLotRepository
-            .findParkingLotDetail(parkingLotId)
-            .orElseThrow(() -> new BusinessException(EnCmmErrCode.NOT_FOUND, "주차장 정보를 찾을 수 없습니다."));
+                .findParkingLotDetail(parkingLotId)
+                .orElseThrow(() -> new BusinessException(EnCmmErrCode.NOT_FOUND, "주차장 정보를 찾을 수 없습니다."));
 
         return ParkingLotDetailResDTO.from(parkingLot);
     }
@@ -29,7 +29,7 @@ public class ParkingLotService {
     public List<ParkingLotNearbyResDTO> getNearbyParkingLots(Double latitude, Double longitude, Double radius) {
 
         return parkingLotRepository.findNearbyParkingLots(latitude, longitude, radius).stream()
-            .map(ParkingLotNearbyResDTO::from)
-            .toList();
+                .map(ParkingLotNearbyResDTO::from)
+                .toList();
     }
 }

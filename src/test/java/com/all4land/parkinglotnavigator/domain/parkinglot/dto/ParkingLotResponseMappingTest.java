@@ -65,8 +65,7 @@ class ParkingLotResponseMappingTest {
     @Test
     void nearbyResponseOldConstructorRemainsCompatible() {
         ParkingLotNearbyResDTO oldFormat = new ParkingLotNearbyResDTO(
-                1L, "주차장", null, 10, 37.5, 126.9, 100.0,
-                null, null, "PUBLIC", "공영", "OFF_STREET", "노외");
+                1L, "주차장", null, 10, 37.5, 126.9, 100.0, null, null, "PUBLIC", "공영", "OFF_STREET", "노외");
 
         assertThat(oldFormat.categoryName()).isEqualTo("공영");
         assertThat(oldFormat.displayAddress()).isNull();

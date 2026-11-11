@@ -70,7 +70,8 @@ public class CommonCodeService {
         if (!Objects.equals(current.code(), request.code())) {
             ensureCodeChangeAllowed(current);
         }
-        if ("ACTIVE".equals(current.state()) && "INACTIVE".equals(request.state())
+        if ("ACTIVE".equals(current.state())
+                && "INACTIVE".equals(request.state())
                 && (isReservedRoot(current) || isReferenced(current))) {
             throw new BusinessException(EnCmmErrCode.CONFLICT, "현재 사용 중인 공통코드는 비활성화할 수 없습니다.");
         }

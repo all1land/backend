@@ -92,7 +92,7 @@ public interface ParkingLotRepository extends JpaRepository<ParkingLot, Long> {
         ORDER BY distance ASC
         """, nativeQuery = true)
     List<NearbyParkingLotProjection> findNearbyParkingLots(
-        @Param("latitude") Double latitude, @Param("longitude") Double longitude, @Param("radius") Double radius);
+            @Param("latitude") Double latitude, @Param("longitude") Double longitude, @Param("radius") Double radius);
 
     @Query(value = """
         SELECT
