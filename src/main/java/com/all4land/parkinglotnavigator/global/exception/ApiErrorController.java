@@ -1,8 +1,8 @@
 package com.all4land.parkinglotnavigator.global.exception;
 
-import com.all4land.parkinglotnavigator.global.exception.swagger.ErrorApi;
 import com.all4land.parkinglotnavigator.global.response.ApiResponse;
 import com.all4land.parkinglotnavigator.global.response.CommonErrorCode;
+import com.all4land.parkinglotnavigator.swagger.ErrorApi;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
