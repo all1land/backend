@@ -45,7 +45,7 @@ public interface PlaceApi {
                           "message": "성공적으로 요청을 처리했습니다.",
                           "data": {
                             "pagination": {"pageIndex": 1, "pageSize": 10, "pageNum": 1, "pageCnt": 1, "totalCnt": 1},
-                            "filter": {"keyword": "", "minLat": 37.55, "minLon": 126.82,
+                            "filter": {"keyword": "마곡", "minLat": 37.55, "minLon": 126.82,
                                        "maxLat": 37.58, "maxLon": 126.85, "centerLat": 37.56, "centerLon": 126.83, "zoom": 15},
                             "list": [{"id": 1, "name": "마곡 목적지", "roadNameAddress": "서울 강서구 예시로 1",
                                       "lotNumberAddress": "서울 강서구 마곡동 1", "latitude": 37.56, "longitude": 126.83,

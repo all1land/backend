@@ -39,7 +39,7 @@ class PlaceListReqDTOTest {
     void bindsExistingQueryPropertiesAndNormalizesKeyword() {
         var request = validRequest();
         var binding = new BeanWrapperImpl(request);
-        binding.setPropertyValue("filterKeyword", "  마곡  ");
+        binding.setPropertyValue("keyword", "  마곡  ");
         binding.setPropertyValue("pageIndex", "2");
         binding.setPropertyValue("pageSize", "20");
         binding.setPropertyValue("centerLat", "37.56");
@@ -101,11 +101,11 @@ class PlaceListReqDTOTest {
     @Test
     void retainsKeywordLengthAndNullHandling() {
         var request = validRequest();
-        request.setFilterKeyword("x".repeat(101));
+        request.setKeyword("x".repeat(101));
         assertThat(validator.validate(request))
                 .extracting(v -> v.getPropertyPath().toString())
                 .contains("keyword");
-        request.setFilterKeyword(null);
+        request.setKeyword(null);
         assertThat(request.getKeyword()).isEmpty();
         assertThat(validator.validate(request)).isEmpty();
     }

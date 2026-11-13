@@ -27,7 +27,7 @@ public class PlaceListReqDTO {
     @Setter(AccessLevel.NONE)
     private String keyword = "";
 
-    public void setFilterKeyword(String keyword) {
+    public void setKeyword(String keyword) {
         this.keyword = keyword == null ? "" : keyword.strip();
     }
 
