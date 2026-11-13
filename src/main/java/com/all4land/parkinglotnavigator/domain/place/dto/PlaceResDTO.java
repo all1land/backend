@@ -1,6 +1,6 @@
 package com.all4land.parkinglotnavigator.domain.place.dto;
 
-// poiId는 TMAP 식별자이며 tb_place의 기본 키가 아니다. 좌표계는 WGS84이다.
+// DB 장소 조회 응답의 poiId는 tb_place의 기본 키를 문자열로 반환한다. 좌표계는 WGS84이다.
 public record PlaceResDTO(
         String poiId,
         String name,

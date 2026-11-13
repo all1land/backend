@@ -48,4 +48,14 @@ public class PlaceService {
         }
         return new CmmFilterDTO(values);
     }
+
+    @Transactional(readOnly = true)
+    public PlaceResDTO getPlace(Long id) {
+        if (id == null || id <= 0) {
+            throw new BusinessException(EnCmmErrCode.VALIDATION_ERROR, "장소 ID는 양수여야 합니다.");
+        }
+        return placeRepository
+                .findById(id)
+                .orElseThrow(() -> new BusinessException(EnCmmErrCode.NOT_FOUND, "장소 정보를 찾을 수 없습니다."));
+    }
 }
