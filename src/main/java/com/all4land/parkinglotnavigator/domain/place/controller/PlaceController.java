@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +28,13 @@ public class PlaceController implements PlaceApi {
     public ApiResDTO<CmmListResDTO<PlaceResDTO>> getPlaces(
             @Valid @ModelAttribute @ParameterObject PlaceListReqDTO request) {
         CmmListResDTO<PlaceResDTO> response = placeService.getPlaces(request);
+        return ApiResDTO.success(EnCmmScssCode.OK, response);
+    }
+
+    @Override
+    @GetMapping("/{id}")
+    public ApiResDTO<PlaceResDTO> getPlace(@PathVariable("id") Long id) {
+        PlaceResDTO response = placeService.getPlace(id);
         return ApiResDTO.success(EnCmmScssCode.OK, response);
     }
 }

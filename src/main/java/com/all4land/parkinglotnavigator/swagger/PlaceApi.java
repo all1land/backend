@@ -45,7 +45,7 @@ public interface PlaceApi {
                           "message": "성공적으로 요청을 처리했습니다.",
                           "data": {
                             "pagination": {"pageIndex": 1, "pageSize": 10, "pageNum": 1, "pageCnt": 1, "totalCnt": 1},
-                            "filter": {"keyword": "", "minLat": 37.55, "minLon": 126.82,
+                            "filter": {"keyword": "마곡", "minLat": 37.55, "minLon": 126.82,
                                        "maxLat": 37.58, "maxLon": 126.85, "centerLat": 37.56, "centerLon": 126.83, "zoom": 15},
                             "list": [{"id": 1, "name": "마곡 목적지", "roadNameAddress": "서울 강서구 예시로 1",
                                       "lotNumberAddress": "서울 강서구 마곡동 1", "latitude": 37.56, "longitude": 126.83,
@@ -70,4 +70,19 @@ public interface PlaceApi {
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResDTO.class)))
     })
     ApiResDTO<CmmListResDTO<PlaceResDTO>> getPlaces(@ParameterObject PlaceListReqDTO request);
+
+    @Operation(
+            summary = "장소 상세 조회",
+            description = "DB 장소 ID로 삭제되지 않은 장소의 상세 정보를 조회한다. " + "id에는 장소 목록 응답의 poiId 값을 전달한다. 좌표계는 WGS84이다.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "정상 (COMMON_200_001)"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "400",
+                description = "양수가 아니거나 숫자 형식이 아닌 ID (COMMON_400_002)"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "404",
+                description = "존재하지 않거나 삭제된 장소 (COMMON_404_001)")
+    })
+    ApiResDTO<PlaceResDTO> getPlace(
+            @Parameter(description = "장소 DB ID (목록 응답의 poiId)", required = true, example = "1") Long id);
 }

@@ -2,8 +2,11 @@ package com.all4land.parkinglotnavigator.domain.place.repository;
 
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListReqDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResDTO;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -24,7 +27,7 @@ public class PlaceRepository {
                    OR strpos(lower(p.road_name_address), lower(:keyword)) > 0)
             """;
 
-    private static final String LIST_SQL = """
+    private static final String SELECT_SQL = """
              SELECT p.id::text AS poi_id,
                      p.name,
                      p.category_code,
@@ -36,7 +39,10 @@ public class PlaceRepository {
                    ST_X(p.location::geometry) AS longitude,
                    ST_Y(p.entrance_location::geometry) AS entrance_latitude,
                    ST_X(p.entrance_location::geometry) AS entrance_longitude
-            """ + CONDITIONS + " ORDER BY p.id ASC LIMIT :limit OFFSET :offset";
+            """;
+
+    private static final String LIST_SQL = SELECT_SQL + CONDITIONS + " ORDER BY p.id ASC LIMIT :limit OFFSET :offset";
+    private static final String DETAIL_SQL = SELECT_SQL + " FROM tb_place p WHERE p.id = :id AND p.deleted_at IS NULL";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -48,21 +54,7 @@ public class PlaceRepository {
         var parameters = new MapSqlParameterSource(parameters(request))
                 .addValue("limit", request.getPageSize())
                 .addValue("offset", (long) (request.getPageIndex() - 1) * request.getPageSize());
-        return jdbcTemplate.query(
-                LIST_SQL,
-                parameters,
-                (rs, rowNum) -> new PlaceResDTO(
-                        rs.getString("poi_id"),
-                        rs.getString("name"),
-                        rs.getString("category_code"),
-                        rs.getString("road_name_address"),
-                        rs.getString("lot_number_address"),
-                        rs.getString("zip_code"),
-                        rs.getString("phone"),
-                        rs.getDouble("latitude"),
-                        rs.getDouble("longitude"),
-                        rs.getObject("entrance_latitude", Double.class),
-                        rs.getObject("entrance_longitude", Double.class)));
+        return jdbcTemplate.query(LIST_SQL, parameters, this::mapPlace);
     }
 
     private Map<String, Object> parameters(PlaceListReqDTO request) {
@@ -77,5 +69,25 @@ public class PlaceRepository {
                 request.getMaxLon(),
                 "keyword",
                 request.getKeyword());
+    }
+
+    public Optional<PlaceResDTO> findById(Long id) {
+        return jdbcTemplate.query(DETAIL_SQL, Map.of("id", id), this::mapPlace).stream()
+                .findFirst();
+    }
+
+    private PlaceResDTO mapPlace(ResultSet rs, int rowNum) throws SQLException {
+        return new PlaceResDTO(
+                rs.getString("poi_id"),
+                rs.getString("name"),
+                rs.getString("category_code"),
+                rs.getString("road_name_address"),
+                rs.getString("lot_number_address"),
+                rs.getString("zip_code"),
+                rs.getString("phone"),
+                rs.getDouble("latitude"),
+                rs.getDouble("longitude"),
+                rs.getObject("entrance_latitude", Double.class),
+                rs.getObject("entrance_longitude", Double.class));
     }
 }
