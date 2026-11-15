@@ -37,6 +37,66 @@ class RoadNetworkDataTest {
     }
 
     @Test
+    void loadsNodeAttributes() {
+        assertThat(count("tb_road_node WHERE node_type_code IS NOT NULL")).isEqualTo(7462);
+        assertThat(count("tb_road_node WHERE has_turn_restriction")).isEqualTo(602);
+    }
+
+    @Test
+    void createsUTurnProhibitionsOutsideAllowedSpots() {
+        // 진입·진출 방향이 150도 이상 반대인 쌍에서 막다른 길, U턴 허용 지점(011, 012)을 빼고 교차로 안 연결 링크 6개 이하로 이어지는 것
+        assertThat(count("tb_road_uturn_prohibition")).isEqualTo(1939);
+        assertThat(count("""
+                        tb_road_uturn_prohibition u
+                        JOIN tb_road_turn_restriction t
+                          ON t.from_link_id = u.from_link_id AND t.to_link_id = u.to_link_id
+                         AND t.turn_type_code IN ('011', '012')
+                        """)).as("U턴 허용 지점은 금지하지 않는다").isZero();
+
+        // link_path는 진입 링크로 시작해 진출 링크로 끝나고, 앞 링크의 종료 노드에서 다음 링크가 시작한다
+        assertThat(count("tb_road_uturn_prohibition"
+                        + " WHERE link_path[1] <> from_link_id OR link_path[cardinality(link_path)] <> to_link_id"))
+                .isZero();
+        assertThat(count("""
+                        tb_road_uturn_prohibition u
+                        CROSS JOIN LATERAL generate_subscripts(u.link_path, 1) i
+                        JOIN tb_road_link a ON a.id = u.link_path[i]
+                        JOIN tb_road_link b ON b.id = u.link_path[i + 1]
+                        WHERE a.end_node_id <> b.start_node_id
+                        """)).isZero();
+    }
+
+    @Test
+    void loadsTurnRestrictionsWithConnectedLinkPaths() {
+        // 진입·진출 링크가 모두 차량 네트워크에 있는 회전정보
+        assertThat(count("tb_road_turn_restriction")).isEqualTo(672);
+        // 금지 유형(101, 102, 103) 중 경로 탐색 대상 링크로 이어지는 것.
+        // 나머지는 진입·진출 링크가 탐색 대상이 아니거나, 교차로 안 연결 링크가 없어 원래 갈 수 없는 회전이다.
+        assertThat(count("tb_road_turn_restriction WHERE link_path IS NOT NULL"
+                        + " AND turn_type_code IN ('101', '102', '103', '003', '002')"))
+                .isEqualTo(198);
+
+        // link_path는 진입 링크로 시작해 진출 링크로 끝나고, 앞 링크의 종료 노드에서 다음 링크가 시작한다
+        assertThat(count("tb_road_turn_restriction WHERE link_path IS NOT NULL"
+                        + " AND (link_path[1] <> from_link_id OR link_path[cardinality(link_path)] <> to_link_id)"))
+                .isZero();
+        assertThat(count("""
+                        tb_road_turn_restriction r
+                        CROSS JOIN LATERAL generate_subscripts(r.link_path, 1) i
+                        JOIN tb_road_link a ON a.id = r.link_path[i]
+                        JOIN tb_road_link b ON b.id = r.link_path[i + 1]
+                        WHERE a.end_node_id <> b.start_node_id
+                        """)).isZero();
+    }
+
+    @Test
+    void marksIntersectionInternalLinks() {
+        // 양 끝 노드가 같은 교차로 그룹(노드 ID 앞 8자리)에 속한 링크
+        assertThat(count("tb_road_link WHERE is_routable AND is_intersection_internal"))
+                .isEqualTo(3189);
+    }
+
+    @Test
     void travelTimeIsLengthOverSpeedLimit() {
         assertThat(count("tb_road_link WHERE abs(travel_time_s - length_m / (max_speed_kph / 3.6)) > 1e-9"))
                 .isZero();
