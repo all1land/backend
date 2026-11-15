@@ -10,6 +10,7 @@ import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -22,6 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @EnableConfigurationProperties(DrivingRouteProperties.class)
 public class DrivingRouteService {
+
+    // 반대 방향 차선 판단 기준: 차로 수 이상이면 중앙선을 넘어 들어갈 수 없다고 본다
+    private static final int MULTI_LANE = 2;
+    // 진행 방향이 이만큼 이상 차이 나면 반대 방향
+    private static final double OPPOSITE_HEADING_DEGREES = 150;
+    // 가장 가까운 링크보다 이만큼 이내로 더 먼 링크까지 반대 방향 차선으로 본다 (방향별 링크 간격 약 12m, 넓은 도로는 더 벌어짐)
+    private static final double OPPOSITE_CARRIAGEWAY_GAP_METERS = 40;
 
     private final DrivingRouteRepository drivingRouteRepository;
     private final DrivingRouteProperties properties;
@@ -56,7 +64,7 @@ public class DrivingRouteService {
         }
 
         List<SnappedPoint> starts = snap(startLat, startLng);
-        List<SnappedPoint> ends = snap(endLat, endLng);
+        List<SnappedPoint> ends = withoutOppositeCarriageway(snap(endLat, endLng));
         Choice best = choose(starts, ends);
 
         List<PathPart> path = drivingRouteRepository.findPath(best.start(), best.end());
@@ -79,6 +87,37 @@ public class DrivingRouteService {
             throw new BusinessException(EnRouteErrCode.ROAD_LINK_NOT_NEARBY);
         }
         return candidates;
+    }
+
+    // 도착 후보에서 차로가 여러 개인 도로의 반대 방향 차선을 뺀다.
+    // 양방향 도로는 방향별 링크가 약 12m 떨어져 따로 있어서, 도착지 건너편 차선에 도착해 도로를 가로질러 들어가는 경로가 돌아오는 경로보다
+    // 싸게 계산될 수 있다. 차로가 여러 개인 도로는 중앙선을 넘어 들어갈 수 없다고 보고, 도착지에서 가장 가까운 링크와 같은 도로의 반대 방향
+    // 링크를 후보에서 뺀다. 데이터에 중앙분리대 정보가 없어 차로 수로 판단하며, 1차로 도로는 길을 건너 들어갈 수 있다고 본다.
+    // 출발 쪽은 걸어서 차에 가는 구간이라 적용하지 않는다.
+    private static List<SnappedPoint> withoutOppositeCarriageway(List<SnappedPoint> candidates) {
+        SnappedPoint nearest = candidates.getFirst();
+        if (nearest.lanes() == null || nearest.lanes() < MULTI_LANE) {
+            return candidates;
+        }
+        return candidates.stream()
+                .filter(candidate -> candidate == nearest || !isOppositeCarriageway(nearest, candidate))
+                .toList();
+    }
+
+    // 같은 도로(도로명이 같거나 둘 다 없음)이고, 진행 방향이 반대이며, 방향별 링크 간격 정도로 떨어진 링크
+    private static boolean isOppositeCarriageway(SnappedPoint near, SnappedPoint other) {
+        return Objects.equals(near.roadName(), other.roadName())
+                && headingDifference(near.azimuth(), other.azimuth()) >= OPPOSITE_HEADING_DEGREES
+                && other.distanceMeters() - near.distanceMeters() <= OPPOSITE_CARRIAGEWAY_GAP_METERS;
+    }
+
+    // 두 진행 방향의 차이(0~180도). 방향을 모르면 0으로 본다
+    private static double headingDifference(double a, double b) {
+        if (Double.isNaN(a) || Double.isNaN(b)) {
+            return 0;
+        }
+        double diff = Math.abs(a - b) % 360;
+        return diff > 180 ? 360 - diff : diff;
     }
 
     // 주행 시간 + 양 끝 접근 구간 도보 시간이 가장 작은 출발·도착 후보 조합을 고른다.

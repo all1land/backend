@@ -56,6 +56,44 @@ class DrivingTmapRouteServiceTest {
     }
 
     @Test
+    void doesNotArriveOnOppositeCarriagewayOfMultiLaneRoad() {
+        // 주차장에서 가장 가까운 링크가 2차로 이상이면 그 도로의 반대 방향 차선에 도착하지 않는다.
+        // 마지막 접근 구간이 가장 가까운 링크까지보다 반대 방향 차선 간격만큼 길어지지 않는지로 확인한다.
+        List<Map<String, Object>> lots = jdbcTemplate.queryForList("""
+                SELECT name, ST_Y(location::geometry) AS lat, ST_X(location::geometry) AS lng
+                FROM tb_parking_lot
+                WHERE name <> ?
+                ORDER BY id
+                """, PARKING_LOT_FAR_FROM_ROAD);
+
+        int multiLaneLots = 0;
+        SoftAssertions softly = new SoftAssertions();
+        for (Map<String, Object> lot : lots) {
+            double lat = (double) lot.get("lat");
+            double lng = (double) lot.get("lng");
+            Map<String, Object> nearest = jdbcTemplate.queryForMap("""
+                    SELECT l.lanes, ST_Distance(ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, l.geom::geography) AS m
+                    FROM tb_road_link l
+                    WHERE l.is_routable AND NOT l.is_ramp AND NOT l.is_intersection_internal
+                      AND l.road_rank_code NOT IN ('101', '102') AND l.road_type_code NOT IN ('001', '002')
+                    ORDER BY l.geom <-> ST_SetSRID(ST_MakePoint(?, ?), 4326)
+                    LIMIT 1
+                    """, lng, lat, lng, lat);
+            Integer lanes = (Integer) nearest.get("lanes");
+            if (lanes == null || lanes < 2) {
+                continue;
+            }
+            multiLaneLots++;
+            List<DrivingRouteSegmentDTO> segments = route(BALSAN_LAT, BALSAN_LNG, lat, lng);
+            softly.assertThat((double) segments.getLast().distanceMeters())
+                    .as("%s 도착 접근 구간", lot.get("name"))
+                    .isLessThanOrEqualTo((double) nearest.get("m") + 5);
+        }
+        assertThat(multiLaneLots).isPositive();
+        softly.assertAll();
+    }
+
+    @Test
     void avoidsProhibitedLeftTurn() {
         // 송정중교 교차로: 남부순환로 → 남부순환로11길 좌회전 금지 (진입 → 교차로 안 연결 링크 2개 → 진출)
         Map<String, Object> turn = jdbcTemplate.queryForMap("""

@@ -30,9 +30,9 @@ class DrivingRouteRepositoryTest {
     @Test
     void batchDriveCostsMatchPairwiseDriveCosts() {
         List<SnappedPoint> ends = parkingLotCandidates();
-        // 회전 제한 경로 링크 위의 도착 후보도 있어야 두 계산 방식을 모두 거친다
-        assertThat(ends).anyMatch(this::onRestrictionPath);
-        assertThat(ends).anyMatch(end -> !onRestrictionPath(end));
+        // 금지 경로(회전 금지, U턴 금지) 링크 위의 도착 후보도 있어야 두 계산 방식을 모두 거친다
+        assertThat(ends).anyMatch(this::onProhibitedPath);
+        assertThat(ends).anyMatch(end -> !onProhibitedPath(end));
 
         SoftAssertions softly = new SoftAssertions();
         // 발산역교차로·송정중교 좌회전 금지의 진입 링크 위에서 출발하는 경우를 포함한다
@@ -57,6 +57,42 @@ class DrivingRouteRepositoryTest {
         softly.assertAll();
     }
 
+    @Test
+    void pathDoesNotUTurnOutsideAllowedSpots() {
+        // U턴 허용 지점이 아닌 교차로: 진입 링크 → 교차로 안 연결 링크 3개 → 반대 방향 진출 링크.
+        // 데이터를 자른 범위의 경계 근처는 U턴을 막으면 차를 돌려 돌아올 길이 없을 수 있어 강서구(링크 ID 1150) 안에서 고른다.
+        Map<String, Object> uturn = jdbcTemplate.queryForMap("""
+                SELECT u.from_link_id, u.to_link_id,
+                       (SELECT sum(l.length_m) FROM unnest(u.link_path[2:cardinality(u.link_path) - 1]) c(id)
+                        JOIN tb_road_link l ON l.id = c.id) AS connector_m,
+                       f.length_m AS from_m, t.length_m AS to_m
+                FROM tb_road_uturn_prohibition u
+                JOIN tb_road_link f ON f.id = u.from_link_id
+                JOIN tb_road_link t ON t.id = u.to_link_id
+                WHERE cardinality(u.link_path) = 5 AND f.length_m >= 100 AND t.length_m >= 100
+                  AND u.from_link_id::TEXT LIKE '1150%'
+                ORDER BY u.from_link_id, u.to_link_id
+                LIMIT 1
+                """);
+        // 후보 선택을 거치지 않도록 진입 링크 30% 지점과 진출 링크 30% 지점을 직접 지정한다
+        SnappedPoint onFrom = new SnappedPoint((long) uturn.get("from_link_id"), 0.3, 0, 0, 0);
+        SnappedPoint onTo = new SnappedPoint((long) uturn.get("to_link_id"), 0.3, 0, 0, 0);
+        // 금지된 U턴으로 바로 돌아 나올 때의 주행 거리
+        double direct = (double) uturn.get("from_m") * 0.7
+                + (double) uturn.get("connector_m")
+                + (double) uturn.get("to_m") * 0.3;
+
+        // U턴하지 않고 돌아오는 합법적인 경로가 있다
+        assertThat(repository.findDriveCosts(List.of(onFrom), List.of(onTo)))
+                .singleElement()
+                .satisfies(cost -> assertThat(cost.violatesTurnRestriction()).isFalse());
+        double distance = repository.findPath(onFrom, onTo).stream()
+                .mapToDouble(DrivingRouteRepository.PathPart::distanceMeters)
+                .sum();
+
+        assertThat(distance).isGreaterThan(direct + 50);
+    }
+
     // 주차장마다 도착 후보(투영점) 최대 4개
     private List<SnappedPoint> parkingLotCandidates() {
         List<SnappedPoint> ends = new ArrayList<>();
@@ -68,13 +104,15 @@ class DrivingRouteRepositoryTest {
         return ends;
     }
 
-    private boolean onRestrictionPath(SnappedPoint point) {
+    private boolean onProhibitedPath(SnappedPoint point) {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject("""
                 SELECT EXISTS (
                     SELECT 1 FROM tb_road_turn_restriction
                     WHERE link_path IS NOT NULL AND turn_type_code IN ('101', '102', '103', '003', '002')
-                      AND ? = ANY(link_path))
-                """, Boolean.class, point.linkId()));
+                      AND ? = ANY(link_path)
+                    UNION ALL
+                    SELECT 1 FROM tb_road_uturn_prohibition WHERE ? = ANY(link_path))
+                """, Boolean.class, point.linkId(), point.linkId()));
     }
 
     private static Map<String, Double> byPair(List<DriveCost> costs) {
