@@ -64,12 +64,12 @@ public class DrivingRouteService {
             throw new BusinessException(EnRouteErrCode.DRIVING_ROUTE_NOT_FOUND);
         }
 
-        List<DrivingRouteSegmentDTO> segments = new ArrayList<>();
-        segments.add(accessSegment(
-                startLng, startLat, best.start().lng(), best.start().lat(), best.start()));
-        path.forEach(part -> segments.add(segment(part.coordinates(), part.distanceMeters(), part.durationSeconds())));
-        segments.add(accessSegment(best.end().lng(), best.end().lat(), endLng, endLat, best.end()));
-        return segments;
+        List<Piece> pieces = new ArrayList<>();
+        pieces.add(
+                accessPiece(startLng, startLat, best.start().lng(), best.start().lat(), best.start()));
+        path.forEach(part -> pieces.add(new Piece(part.coordinates(), part.distanceMeters(), part.durationSeconds())));
+        pieces.add(accessPiece(best.end().lng(), best.end().lat(), endLng, endLat, best.end()));
+        return toSegments(pieces);
     }
 
     private List<SnappedPoint> snap(double lat, double lng) {
@@ -129,26 +129,49 @@ public class DrivingRouteService {
     }
 
     // 접근 구간: 원래 좌표와 도로 위 투영점을 잇는 직선 구간. 걸어서 이동한다고 본다.
-    private DrivingRouteSegmentDTO accessSegment(
-            double fromLng, double fromLat, double toLng, double toLat, SnappedPoint snapped) {
-        return segment(
+    private Piece accessPiece(double fromLng, double fromLat, double toLng, double toLat, SnappedPoint snapped) {
+        return new Piece(
                 List.of(new double[] {fromLng, fromLat}, new double[] {toLng, toLat}),
                 snapped.distanceMeters(),
                 snapped.distanceMeters() / properties.accessWalkingSpeedMps());
     }
 
-    private static DrivingRouteSegmentDTO segment(List<double[]> coordinates, double distanceMeters, double seconds) {
+    // 구간마다 반올림하면 구간이 많을수록 합계 오차가 쌓인다(구간 약 40개에 최대 4초).
+    // 처음부터 그 구간까지의 누적값을 반올림해 직전 누적값과의 차이를 구간 값으로 쓴다. 각 구간 값은 1 안쪽으로만 달라지고,
+    // 구간을 모두 더하면 전체를 한 번에 반올림한 값과 같다. 누적값은 줄지 않아 구간 값이 음수가 되지 않는다.
+    private static List<DrivingRouteSegmentDTO> toSegments(List<Piece> pieces) {
+        List<DrivingRouteSegmentDTO> segments = new ArrayList<>();
+        double distance = 0;
+        double seconds = 0;
+        long roundedDistance = 0;
+        long roundedSeconds = 0;
+        for (Piece piece : pieces) {
+            distance += piece.distanceMeters();
+            seconds += piece.seconds();
+            long nextDistance = Math.round(distance);
+            long nextSeconds = Math.round(seconds);
+            segments.add(segment(
+                    piece.coordinates(), (int) (nextDistance - roundedDistance), (int) (nextSeconds - roundedSeconds)));
+            roundedDistance = nextDistance;
+            roundedSeconds = nextSeconds;
+        }
+        return segments;
+    }
+
+    private static DrivingRouteSegmentDTO segment(List<double[]> coordinates, int distanceMeters, int seconds) {
         double[] first = coordinates.getFirst();
         double[] last = coordinates.getLast();
-        return new DrivingRouteSegmentDTO(
-                first[1],
-                first[0],
-                last[1],
-                last[0],
-                (int) Math.round(distanceMeters),
-                (int) Math.round(seconds),
-                coordinates);
+        return new DrivingRouteSegmentDTO(first[1], first[0], last[1], last[0], distanceMeters, seconds, coordinates);
     }
+
+    /**
+     * 반올림 전 구간.
+     *
+     * @param coordinates 구간 선형 좌표열. WGS84, [경도, 위도] 순서
+     * @param distanceMeters 구간 거리(m)
+     * @param seconds 구간 소요 시간(초)
+     */
+    private record Piece(List<double[]> coordinates, double distanceMeters, double seconds) {}
 
     /**
      * @param start 선택한 출발 투영점
