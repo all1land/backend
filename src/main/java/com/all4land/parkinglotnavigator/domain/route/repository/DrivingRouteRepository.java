@@ -1,5 +1,6 @@
 package com.all4land.parkinglotnavigator.domain.route.repository;
 
+import com.all4land.parkinglotnavigator.domain.route.DrivingRouteProperties;
 import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,19 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 // tb_road_link는 JPA 엔티티 없이 PostGIS/pgRouting 함수로만 조회한다. 좌표는 모두 WGS84(EPSG:4326).
 // 링크는 시작 노드 → 종료 노드 방향으로만 갈 수 있다. 양방향 도로는 방향별 링크가 따로 있다.
 @Repository
-@RequiredArgsConstructor
 public class DrivingRouteRepository {
 
-    // pgRouting에 넘기는 간선 SQL. 경로 탐색 대상 링크만 쓰고, 비용은 주행 시간(초), 역방향은 갈 수 없다(-1).
-    private static final String EDGES_SQL = "SELECT id, start_node_id AS source, end_node_id AS target,"
-            + " travel_time_s AS cost, -1::FLOAT8 AS reverse_cost FROM tb_road_link WHERE is_routable";
+    // 링크를 끝까지 지나는 데 걸리는 보정 주행 시간(초) = 제한속도 주행 시간 / 속도 계수 + (교차로 안 연결 링크면) 신호 대기 시간.
+    // 경로 비용(간선 SQL)과 구간 소요 시간(PATH_SQL)에 같은 식을 써서, 고른 경로와 보여 주는 시간이 어긋나지 않게 한다.
+    private static final String LINK_SECONDS_SQL =
+            "(%1$stravel_time_s / %2$s + CASE WHEN %1$sis_intersection_internal THEN %3$s ELSE 0 END)";
 
     /** 회전 제한을 어기는 경로에 더하는 비용(초). 다른 길이 없을 때만 이 비용을 내고 금지된 회전을 지나간다. */
     public static final double TURN_RESTRICTION_PENALTY_SECONDS = 1e9;
@@ -34,8 +34,7 @@ public class DrivingRouteRepository {
             Double.toString(TURN_RESTRICTION_PENALTY_SECONDS));
 
     // 투영 후보 링크. 고속·도시고속국도(101, 102), 연결로(램프), 고가·지하차도(001, 002)는 출발지나 주차장에서 바로 들어갈 수
-    // 없어서 제외한다. 교차로 안 연결 링크(양 끝 노드 ID 앞 8자리가 같은 교차로 그룹)도 제외한다. 교차로 한가운데에서 출발하면
-    // 진입 링크를 거치지 않아 회전 제한을 피해 가게 된다.
+    // 없어서 제외한다. 교차로 안 연결 링크도 제외한다. 교차로 한가운데에서 출발하면 진입 링크를 거치지 않아 회전 제한을 피해 가게 된다.
     // 나머지 조건은 도보 경로 투영과 같다: 도(degree) 단위로 후보를 넉넉히 고른 뒤 미터(geography) 거리로 다시 정렬한다.
     private static final String SNAP_SQL = """
             SELECT c.link_id, c.fraction, ST_Y(c.snapped) AS lat, ST_X(c.snapped) AS lng, c.distance_m
@@ -52,7 +51,7 @@ public class DrivingRouteRepository {
                       AND NOT is_ramp
                       AND road_rank_code NOT IN ('101', '102')
                       AND road_type_code NOT IN ('001', '002')
-                      AND left(start_node_id::TEXT, 8) <> left(end_node_id::TEXT, 8)
+                      AND NOT is_intersection_internal
                     ORDER BY geom <-> p.pt
                     LIMIT :prefilter
                 ) l
@@ -106,7 +105,9 @@ public class DrivingRouteRepository {
             ), part AS (
                 SELECT s.seq,
                        l.length_m * (f.to_f - f.from_f) AS distance_m,
-                       l.travel_time_s * (f.to_f - f.from_f) AS duration_s,
+                       (l.travel_time_s / :speedFactor
+                        + CASE WHEN l.is_intersection_internal THEN :intersectionDelay ELSE 0 END)
+                           * (f.to_f - f.from_f) AS duration_s,
                        ST_LineSubstring(l.geom, f.from_f, f.to_f) AS geom
                 FROM step s
                 JOIN tb_road_link l ON l.id = s.edge
@@ -130,6 +131,26 @@ public class DrivingRouteRepository {
     private static final int PREFILTER_FACTOR = 3;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final double speedFactor;
+    private final double intersectionDelaySeconds;
+
+    // pgRouting에 넘기는 간선 SQL. 경로 탐색 대상 링크만 쓰고, 비용은 보정 주행 시간(초), 역방향은 갈 수 없다(-1).
+    // pgRouting이 문자열로 받아 실행해서 바인딩 변수를 쓸 수 없어, 설정값(숫자)을 넣어 한 번 만들어 둔다.
+    private final String edgesSql;
+
+    public DrivingRouteRepository(NamedParameterJdbcTemplate jdbcTemplate, DrivingRouteProperties properties) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.speedFactor = properties.speedFactor();
+        this.intersectionDelaySeconds = properties.intersectionDelaySeconds();
+        this.edgesSql = "SELECT id, start_node_id AS source, end_node_id AS target, "
+                + String.format(
+                        Locale.ROOT,
+                        LINK_SECONDS_SQL,
+                        "",
+                        Double.toString(speedFactor),
+                        Double.toString(intersectionDelaySeconds))
+                + " AS cost, -1::FLOAT8 AS reverse_cost FROM tb_road_link WHERE is_routable";
+    }
 
     /**
      * 좌표에서 가까운 도로 링크들 위로 수선을 내린 투영점을 가까운 순으로 찾는다.
@@ -169,7 +190,7 @@ public class DrivingRouteRepository {
         return jdbcTemplate.query(
                 COST_SQL,
                 Map.of(
-                        "edgesSql", EDGES_SQL,
+                        "edgesSql", edgesSql,
                         "restrictionsSql", RESTRICTIONS_SQL,
                         "startLinkIds",
                                 starts.stream().map(SnappedPoint::linkId).toList(),
@@ -194,11 +215,13 @@ public class DrivingRouteRepository {
         return jdbcTemplate.query(
                 PATH_SQL,
                 Map.of(
-                        "edgesSql", EDGES_SQL,
+                        "edgesSql", edgesSql,
                         "restrictionsSql", RESTRICTIONS_SQL,
                         "pointsSql", pointsSql(List.of(start, end)),
                         "startFraction", start.fraction(),
-                        "endFraction", end.fraction()),
+                        "endFraction", end.fraction(),
+                        "speedFactor", speedFactor,
+                        "intersectionDelay", intersectionDelaySeconds),
                 (rs, rowNum) -> new PathPart(rs.getDouble("distance_m"), rs.getDouble("duration_s"), coordinates(rs)));
     }
 

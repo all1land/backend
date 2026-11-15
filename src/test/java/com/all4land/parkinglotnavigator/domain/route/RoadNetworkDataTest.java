@@ -66,6 +66,13 @@ class RoadNetworkDataTest {
     }
 
     @Test
+    void marksIntersectionInternalLinks() {
+        // 양 끝 노드가 같은 교차로 그룹(노드 ID 앞 8자리)에 속한 링크
+        assertThat(count("tb_road_link WHERE is_routable AND is_intersection_internal"))
+                .isEqualTo(3189);
+    }
+
+    @Test
     void travelTimeIsLengthOverSpeedLimit() {
         assertThat(count("tb_road_link WHERE abs(travel_time_s - length_m / (max_speed_kph / 3.6)) > 1e-9"))
                 .isZero();

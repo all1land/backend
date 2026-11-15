@@ -31,7 +31,7 @@ class DrivingRouteTurnRestrictionFallbackTest {
     @BeforeEach
     void setUp() {
         repository = mock(DrivingRouteRepository.class);
-        service = new DrivingRouteService(repository, new DrivingRouteProperties(200, 4, 1.1));
+        service = new DrivingRouteService(repository, new DrivingRouteProperties(200, 4, 1.1, 0.7, 20));
         given(repository.findPath(any(), any()))
                 .willReturn(List.of(
                         new PathPart(100, 10, List.of(new double[] {126.83, 37.55}, new double[] {126.82, 37.56}))));

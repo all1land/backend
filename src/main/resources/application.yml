@@ -36,3 +36,7 @@ app:
     snap-candidate-count: ${DRIVING_SNAP_CANDIDATE_COUNT:4}
     # 접근 구간(좌표 ↔ 도로 투영점)은 걸어서 이동한다고 보고 도보 경로와 같은 속도로 소요 시간을 계산
     access-walking-speed-mps: ${WALKING_SPEED_MPS:1.1}
+    # 실제 평균 주행 속도 = 제한속도 × 이 값. 기본값은 추정치로, Tmap 비교 검증 후 조정
+    speed-factor: ${DRIVING_SPEED_FACTOR:0.7}
+    # 교차로 안 연결 링크 하나를 지날 때 더하는 신호 대기 시간(초). 우회전 0개, 직진 1개, 좌회전 2개를 지남. 기본값은 추정치로, Tmap 비교 검증 후 조정
+    intersection-delay-seconds: ${DRIVING_INTERSECTION_DELAY_SECONDS:20}
