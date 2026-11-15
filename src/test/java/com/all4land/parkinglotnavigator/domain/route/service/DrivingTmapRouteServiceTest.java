@@ -50,8 +50,67 @@ class DrivingTmapRouteServiceTest {
         List<DrivingRouteSegmentDTO> segments = route(BALSAN_LAT, BALSAN_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
 
         assertConnects(segments, BALSAN_LAT, BALSAN_LNG, SINBANGHWA_LAT, SINBANGHWA_LNG);
-        // 공항대로 → 방화대로 → 마곡서1로 주행 약 2,633m + 양 끝 접근 구간 약 7m, 33m
+        // 발산역교차로의 공항대로36길 → 공항대로 좌회전이 금지라, 공항대로 위 지점(약 20m)에 투영해 출발한다.
+        // 공항대로 → 방화대로 → 마곡서1로 주행 + 양 끝 접근 구간 약 20m, 33m
         assertThat(totalDistance(segments)).isBetween(2650, 2700);
+    }
+
+    @Test
+    void avoidsProhibitedLeftTurn() {
+        // 송정중교 교차로: 남부순환로 → 남부순환로11길 좌회전 금지 (진입 → 교차로 안 연결 링크 2개 → 진출)
+        Map<String, Object> turn = jdbcTemplate.queryForMap("""
+                SELECT r.from_link_id, r.to_link_id,
+                       (SELECT sum(l.length_m) FROM unnest(r.link_path[2:cardinality(r.link_path) - 1]) c(id)
+                        JOIN tb_road_link l ON l.id = c.id) AS connector_m,
+                       f.length_m AS from_m, e.length_m AS to_m
+                FROM tb_road_turn_restriction r
+                JOIN tb_road_link f ON f.id = r.from_link_id
+                JOIN tb_road_link e ON e.id = r.to_link_id
+                WHERE r.from_link_id = 1150055900 AND r.to_link_id = 1150058600 AND r.turn_type_code = '101'
+                """);
+        double[] onFrom = pointOnLink((long) turn.get("from_link_id"), 0.5);
+        double[] onTo = pointOnLink((long) turn.get("to_link_id"), 0.5);
+        // 금지된 좌회전으로 바로 꺾을 때의 주행 거리
+        double direct =
+                (double) turn.get("from_m") * 0.5 + (double) turn.get("connector_m") + (double) turn.get("to_m") * 0.5;
+
+        List<DrivingRouteSegmentDTO> segments = route(onFrom[1], onFrom[0], onTo[1], onTo[0]);
+
+        assertConnects(segments, onFrom[1], onFrom[0], onTo[1], onTo[0]);
+        assertThat((double) totalDistance(segments)).isGreaterThan(direct + 100);
+    }
+
+    @Test
+    void doesNotSnapToIntersectionInternalLink() {
+        // 교차로 안 연결 링크(양 끝 노드가 같은 교차로 그룹) 위의 점에서 출발해도 그 링크에 투영하지 않는다.
+        // 교차로 한가운데서 출발하면 진입 링크를 거치지 않아 회전 제한을 피해 가게 된다.
+        double[] inIntersection =
+                jdbcTemplate.queryForObject("""
+                SELECT ST_X(p), ST_Y(p)
+                FROM (
+                    SELECT ST_LineInterpolatePoint(geom, 0.5) AS p
+                    FROM tb_road_link
+                    WHERE is_routable AND left(start_node_id::TEXT, 8) = left(end_node_id::TEXT, 8) AND length_m >= 20
+                    ORDER BY id
+                    LIMIT 1
+                ) x
+                """, (rs, rowNum) -> new double[] {rs.getDouble(1), rs.getDouble(2)});
+
+        List<DrivingRouteSegmentDTO> segments =
+                route(inIntersection[1], inIntersection[0], SINBANGHWA_LAT, SINBANGHWA_LNG);
+
+        DrivingRouteSegmentDTO access = segments.getFirst();
+        assertThat(access.distanceMeters()).isPositive();
+        // 투영점이 교차로 노드(링크 끝점)에 붙으면 연결 링크와도 거리가 0이라, 교차로 밖 링크가 투영점을 지나는지로 확인한다
+        Boolean onOrdinaryLink = jdbcTemplate.queryForObject("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM tb_road_link
+                    WHERE is_routable
+                      AND left(start_node_id::TEXT, 8) <> left(end_node_id::TEXT, 8)
+                      AND ST_DWithin(geom::geography, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, 0.01))
+                """, Boolean.class, access.endLng(), access.endLat());
+        assertThat(onOrdinaryLink).isTrue();
     }
 
     @Test

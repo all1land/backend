@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.LongStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -22,8 +21,22 @@ public class DrivingRouteRepository {
     private static final String EDGES_SQL = "SELECT id, start_node_id AS source, end_node_id AS target,"
             + " travel_time_s AS cost, -1::FLOAT8 AS reverse_cost FROM tb_road_link WHERE is_routable";
 
+    /** 회전 제한을 어기는 경로에 더하는 비용(초). 다른 길이 없을 때만 이 비용을 내고 금지된 회전을 지나간다. */
+    public static final double TURN_RESTRICTION_PENALTY_SECONDS = 1e9;
+
+    // pgRouting에 넘기는 회전 제한 SQL. 금지 유형(101 좌회전, 102 직진, 103 우회전, 003 회전 금지, 002 버스만 회전)만 쓴다.
+    // path는 진입 링크부터 교차로 안 연결 링크를 거쳐 진출 링크까지의 링크 순서다(V14에서 계산).
+    // 시간제 운영(operation_code=1)도 시간 정보가 없어 항상 금지로 본다. 현재 적재 범위에는 시간제가 없다.
+    private static final String RESTRICTIONS_SQL = String.format(
+            Locale.ROOT,
+            "SELECT link_path AS path, %s::FLOAT8 AS cost FROM tb_road_turn_restriction"
+                    + " WHERE link_path IS NOT NULL AND turn_type_code IN ('101', '102', '103', '003', '002')",
+            Double.toString(TURN_RESTRICTION_PENALTY_SECONDS));
+
     // 투영 후보 링크. 고속·도시고속국도(101, 102), 연결로(램프), 고가·지하차도(001, 002)는 출발지나 주차장에서 바로 들어갈 수
-    // 없어서 제외한다. 나머지 조건은 도보 경로 투영과 같다: 도(degree) 단위로 후보를 넉넉히 고른 뒤 미터(geography) 거리로 다시 정렬한다.
+    // 없어서 제외한다. 교차로 안 연결 링크(양 끝 노드 ID 앞 8자리가 같은 교차로 그룹)도 제외한다. 교차로 한가운데에서 출발하면
+    // 진입 링크를 거치지 않아 회전 제한을 피해 가게 된다.
+    // 나머지 조건은 도보 경로 투영과 같다: 도(degree) 단위로 후보를 넉넉히 고른 뒤 미터(geography) 거리로 다시 정렬한다.
     private static final String SNAP_SQL = """
             SELECT c.link_id, c.fraction, ST_Y(c.snapped) AS lat, ST_X(c.snapped) AS lng, c.distance_m
             FROM (SELECT ST_SetSRID(ST_MakePoint(:lng, :lat), 4326) AS pt) p
@@ -39,6 +52,7 @@ public class DrivingRouteRepository {
                       AND NOT is_ramp
                       AND road_rank_code NOT IN ('101', '102')
                       AND road_type_code NOT IN ('001', '002')
+                      AND left(start_node_id::TEXT, 8) <> left(end_node_id::TEXT, 8)
                     ORDER BY geom <-> p.pt
                     LIMIT :prefilter
                 ) l
@@ -49,11 +63,32 @@ public class DrivingRouteRepository {
             ORDER BY c.distance_m
             """;
 
-    // 출발 후보 × 도착 후보 조합마다 최소 주행 시간을 구한다. 투영점은 가상 정점(-pid)으로 들어간다.
+    // 출발 후보 × 도착 후보 조합마다 회전 제한을 지키는 최소 주행 시간을 구한다.
+    // 투영점을 여러 개 한 번에 넣으면, 금지 경로 중간 링크 위의 투영점에서 링크가 쪼개져 회전 제한이 무시된다.
+    // 그래서 조합마다 출발·도착 투영점 2개만 넣어 경로 SQL(PATH_SQL)과 같은 조건으로 계산한다.
+    // 회전 제한을 지원하는 비용 전용 함수가 없어 경로를 구한 뒤 마지막 누적 비용을 쓴다.
     private static final String COST_SQL = """
-            SELECT start_vid, end_vid, agg_cost
-            FROM pgr_withPointsCost(:edgesSql, :pointsSql, ARRAY[:startVids]::BIGINT[], ARRAY[:endVids]::BIGINT[],
-                                    directed => true)
+            WITH s AS (
+                SELECT link_id, fraction, idx
+                FROM unnest(ARRAY[:startLinkIds]::BIGINT[], ARRAY[:startFractions]::FLOAT8[])
+                     WITH ORDINALITY AS t(link_id, fraction, idx)
+            ), e AS (
+                SELECT link_id, fraction, idx
+                FROM unnest(ARRAY[:endLinkIds]::BIGINT[], ARRAY[:endFractions]::FLOAT8[])
+                     WITH ORDINALITY AS t(link_id, fraction, idx)
+            )
+            SELECT s.idx - 1 AS start_index, e.idx - 1 AS end_index, x.agg_cost
+            FROM s
+            CROSS JOIN e
+            CROSS JOIN LATERAL (
+                SELECT max(agg_cost) AS agg_cost
+                FROM pgr_trsp_withPoints(
+                    :edgesSql, :restrictionsSql,
+                    format('SELECT 1 AS pid, %s::BIGINT AS edge_id, %s::FLOAT8 AS fraction UNION ALL SELECT 2, %s, %s',
+                           s.link_id, s.fraction, e.link_id, e.fraction),
+                    -1, -2, directed => true, details => false)
+            ) x
+            WHERE x.agg_cost IS NOT NULL
             """;
 
     // 출발/도착 투영점을 가상 정점(-1, -2)으로 넣어 링크 중간에서 출발·도착하게 한다.
@@ -63,7 +98,8 @@ public class DrivingRouteRepository {
     private static final String PATH_SQL = """
             WITH path AS (
                 SELECT seq, node, edge
-                FROM pgr_withPoints(:edgesSql, :pointsSql, -1, -2, directed => true)
+                FROM pgr_trsp_withPoints(:edgesSql, :restrictionsSql, :pointsSql, -1, -2,
+                                         directed => true, details => false)
             ), step AS (
                 SELECT seq, node AS from_node, lead(node) OVER (ORDER BY seq) AS to_node, edge
                 FROM path
@@ -126,37 +162,29 @@ public class DrivingRouteRepository {
      *
      * @param starts 출발 투영점 후보 ({@link #snap} 결과)
      * @param ends 도착 투영점 후보 ({@link #snap} 결과)
-     * @return 갈 수 있는 조합별 주행 시간. 갈 수 없는 조합은 빠진다
+     * @return 갈 수 있는 조합별 주행 시간. 갈 수 없는 조합은 빠진다. 회전 제한을 어겨야만 갈 수 있는 조합은
+     *     {@link #TURN_RESTRICTION_PENALTY_SECONDS}가 더해져 있다
      */
     public List<DriveCost> findDriveCosts(List<SnappedPoint> starts, List<SnappedPoint> ends) {
-        List<SnappedPoint> points = new ArrayList<>(starts);
-        points.addAll(ends);
-        // 가상 정점 번호: 출발 후보는 -1 ~ -n, 도착 후보는 -(n+1) ~ -(n+m)
-        List<Long> startVids =
-                LongStream.rangeClosed(1, starts.size()).map(i -> -i).boxed().toList();
-        List<Long> endVids = LongStream.rangeClosed(starts.size() + 1, points.size())
-                .map(i -> -i)
-                .boxed()
-                .toList();
         return jdbcTemplate.query(
                 COST_SQL,
                 Map.of(
-                        "edgesSql",
-                        EDGES_SQL,
-                        "pointsSql",
-                        pointsSql(points),
-                        "startVids",
-                        startVids,
-                        "endVids",
-                        endVids),
-                (rs, rowNum) -> new DriveCost(
-                        (int) (-rs.getLong("start_vid") - 1),
-                        (int) (-rs.getLong("end_vid") - 1 - starts.size()),
-                        rs.getDouble("agg_cost")));
+                        "edgesSql", EDGES_SQL,
+                        "restrictionsSql", RESTRICTIONS_SQL,
+                        "startLinkIds",
+                                starts.stream().map(SnappedPoint::linkId).toList(),
+                        "startFractions",
+                                starts.stream().map(SnappedPoint::fraction).toList(),
+                        "endLinkIds", ends.stream().map(SnappedPoint::linkId).toList(),
+                        "endFractions",
+                                ends.stream().map(SnappedPoint::fraction).toList()),
+                (rs, rowNum) ->
+                        new DriveCost(rs.getInt("start_index"), rs.getInt("end_index"), rs.getDouble("agg_cost")));
     }
 
     /**
-     * 두 투영점 사이의 최단 시간 차량 경로를 지나가는 링크 순서대로 반환한다.
+     * 두 투영점 사이의 회전 제한을 지키는 최단 시간 차량 경로를 지나가는 링크 순서대로 반환한다. 회전 제한을 어기지 않고는 갈 수 없으면
+     * 금지된 회전을 지나는 경로를 반환한다.
      *
      * @param start 출발 투영점 ({@link #snap} 결과)
      * @param end 도착 투영점 ({@link #snap} 결과)
@@ -167,6 +195,7 @@ public class DrivingRouteRepository {
                 PATH_SQL,
                 Map.of(
                         "edgesSql", EDGES_SQL,
+                        "restrictionsSql", RESTRICTIONS_SQL,
                         "pointsSql", pointsSql(List.of(start, end)),
                         "startFraction", start.fraction(),
                         "endFraction", end.fraction()),
@@ -211,9 +240,14 @@ public class DrivingRouteRepository {
     /**
      * @param startIndex 출발 후보 목록에서의 위치
      * @param endIndex 도착 후보 목록에서의 위치
-     * @param seconds 최소 주행 시간(초)
+     * @param seconds 최소 주행 시간(초). 회전 제한을 어겨야만 갈 수 있으면 {@link #TURN_RESTRICTION_PENALTY_SECONDS}가 더해져 있다
      */
-    public record DriveCost(int startIndex, int endIndex, double seconds) {}
+    public record DriveCost(int startIndex, int endIndex, double seconds) {
+
+        public boolean violatesTurnRestriction() {
+            return seconds >= TURN_RESTRICTION_PENALTY_SECONDS;
+        }
+    }
 
     /**
      * @param distanceMeters 구간 거리(m)

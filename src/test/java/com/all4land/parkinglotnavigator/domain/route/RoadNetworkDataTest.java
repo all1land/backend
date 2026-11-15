@@ -37,6 +37,35 @@ class RoadNetworkDataTest {
     }
 
     @Test
+    void loadsNodeAttributes() {
+        assertThat(count("tb_road_node WHERE node_type_code IS NOT NULL")).isEqualTo(7462);
+        assertThat(count("tb_road_node WHERE has_turn_restriction")).isEqualTo(602);
+    }
+
+    @Test
+    void loadsTurnRestrictionsWithConnectedLinkPaths() {
+        // 진입·진출 링크가 모두 차량 네트워크에 있는 회전정보
+        assertThat(count("tb_road_turn_restriction")).isEqualTo(672);
+        // 금지 유형(101, 102, 103) 중 경로 탐색 대상 링크로 이어지는 것.
+        // 나머지는 진입·진출 링크가 탐색 대상이 아니거나, 교차로 안 연결 링크가 없어 원래 갈 수 없는 회전이다.
+        assertThat(count("tb_road_turn_restriction WHERE link_path IS NOT NULL"
+                        + " AND turn_type_code IN ('101', '102', '103', '003', '002')"))
+                .isEqualTo(198);
+
+        // link_path는 진입 링크로 시작해 진출 링크로 끝나고, 앞 링크의 종료 노드에서 다음 링크가 시작한다
+        assertThat(count("tb_road_turn_restriction WHERE link_path IS NOT NULL"
+                        + " AND (link_path[1] <> from_link_id OR link_path[cardinality(link_path)] <> to_link_id)"))
+                .isZero();
+        assertThat(count("""
+                        tb_road_turn_restriction r
+                        CROSS JOIN LATERAL generate_subscripts(r.link_path, 1) i
+                        JOIN tb_road_link a ON a.id = r.link_path[i]
+                        JOIN tb_road_link b ON b.id = r.link_path[i + 1]
+                        WHERE a.end_node_id <> b.start_node_id
+                        """)).isZero();
+    }
+
+    @Test
     void travelTimeIsLengthOverSpeedLimit() {
         assertThat(count("tb_road_link WHERE abs(travel_time_s - length_m / (max_speed_kph / 3.6)) > 1e-9"))
                 .isZero();

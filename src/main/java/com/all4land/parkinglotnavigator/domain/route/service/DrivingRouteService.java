@@ -11,10 +11,12 @@ import com.all4land.parkinglotnavigator.global.response.EnRouteErrCode;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -34,7 +36,10 @@ public class DrivingRouteService {
      * 거리가 0이어도 넣어서, 첫 구간과 마지막 구간이 항상 도보라는 것을 위치로 알 수 있게 한다. 그 사이 구간은 링크별 주행 구간이다. 출발지와 도착지가 같으면 빈 목록을
      * 반환한다.
      *
-     * <p>주행 시간은 제한속도로 계속 달린다고 보고 계산해서 신호 대기와 교통 상황이 빠져 있다. 회전 제한(좌회전 금지 등)도 아직 반영하지 않는다.
+     * <p>회전 제한(좌회전·직진·우회전 금지 등)을 지킨다. 출발·도착 후보 조합 모두 금지된 회전을 지나야만 갈 수 있으면, 경로를 못 찾았다고 하지 않고 그중
+     * 가장 빠른 경로를 반환하며 경고 로그를 남긴다.
+     *
+     * <p>주행 시간은 제한속도로 계속 달린다고 보고 계산해서 신호 대기와 교통 상황이 빠져 있다.
      *
      * @param startLat 출발지 위도 (WGS84, EPSG:4326)
      * @param startLng 출발지 경도 (WGS84, EPSG:4326)
@@ -76,28 +81,45 @@ public class DrivingRouteService {
     }
 
     // 주행 시간 + 양 끝 접근 구간 도보 시간이 가장 작은 출발·도착 후보 조합을 고른다.
+    // 회전 제한을 어기는 조합은 주행 시간에 큰 비용이 더해져 있어서, 지키는 조합이 하나라도 있으면 그쪽이 선택된다.
     private Choice choose(List<SnappedPoint> starts, List<SnappedPoint> ends) {
         Choice best = null;
         for (DriveCost cost : drivingRouteRepository.findDriveCosts(starts, ends)) {
-            best = better(best, starts.get(cost.startIndex()), ends.get(cost.endIndex()), cost.seconds());
+            best = better(
+                    best,
+                    starts.get(cost.startIndex()),
+                    ends.get(cost.endIndex()),
+                    cost.seconds(),
+                    cost.violatesTurnRestriction());
         }
         // 같은 위치에 투영된 두 후보 사이는 주행할 필요가 없다. pgRouting이 비용을 돌려주지 않을 수 있어 직접 넣는다.
         for (SnappedPoint start : starts) {
             for (SnappedPoint end : ends) {
                 if (samePosition(start, end)) {
-                    best = better(best, start, end, 0);
+                    best = better(best, start, end, 0, false);
                 }
             }
         }
         if (best == null) {
             throw new BusinessException(EnRouteErrCode.DRIVING_ROUTE_NOT_FOUND);
         }
+        if (best.violatesTurnRestriction()) {
+            log.warn(
+                    "[DrivingRoute] 회전 제한을 지키는 경로가 없어 금지된 회전을 지나는 경로를 반환합니다. start link={}, end link={}",
+                    best.start().linkId(),
+                    best.end().linkId());
+        }
         return best;
     }
 
-    private Choice better(Choice current, SnappedPoint start, SnappedPoint end, double driveSeconds) {
+    private Choice better(
+            Choice current,
+            SnappedPoint start,
+            SnappedPoint end,
+            double driveSeconds,
+            boolean violatesTurnRestriction) {
         double accessSeconds = (start.distanceMeters() + end.distanceMeters()) / properties.accessWalkingSpeedMps();
-        Choice candidate = new Choice(start, end, driveSeconds + accessSeconds);
+        Choice candidate = new Choice(start, end, driveSeconds + accessSeconds, violatesTurnRestriction);
         return current == null || candidate.totalSeconds() < current.totalSeconds() ? candidate : current;
     }
 
@@ -131,6 +153,7 @@ public class DrivingRouteService {
      * @param start 선택한 출발 투영점
      * @param end 선택한 도착 투영점
      * @param totalSeconds 주행 시간 + 양 끝 접근 구간 도보 시간(초)
+     * @param violatesTurnRestriction 회전 제한을 어겨야만 갈 수 있는 조합인지
      */
-    private record Choice(SnappedPoint start, SnappedPoint end, double totalSeconds) {}
+    private record Choice(SnappedPoint start, SnappedPoint end, double totalSeconds, boolean violatesTurnRestriction) {}
 }
