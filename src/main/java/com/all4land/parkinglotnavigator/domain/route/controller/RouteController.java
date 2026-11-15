@@ -5,6 +5,7 @@ import com.all4land.parkinglotnavigator.domain.route.dto.RouteResDTO;
 import com.all4land.parkinglotnavigator.domain.route.service.RouteService;
 import com.all4land.parkinglotnavigator.global.response.ApiResDTO;
 import com.all4land.parkinglotnavigator.global.response.EnCmmScssCode;
+import com.all4land.parkinglotnavigator.swagger.IntegratedRouteApi;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,10 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/routes")
-public class RouteController {
+public class RouteController implements IntegratedRouteApi {
 
     private final RouteService routeService;
 
+    @Override
     @PostMapping("/all")
     public ApiResDTO<RouteResDTO> routeByCoordinates(@Valid @RequestBody RouteCrdReqDTO request) {
 

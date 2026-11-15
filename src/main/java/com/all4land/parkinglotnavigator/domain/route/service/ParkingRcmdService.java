@@ -53,7 +53,12 @@ public class ParkingRcmdService {
                     destination.longitude());
 
             evaluated.add(new ItemDTO(
-                    0, parking.id(), parking.name(), route.totalDistanceMeters(), route.totalDurationSeconds()));
+                    0,
+                    parking.id(),
+                    parking.name(),
+                    route.totalDistanceMeters(),
+                    route.totalDurationSeconds(),
+                    route.summary()));
         }
 
         evaluated.sort(Comparator.comparingLong(ItemDTO::totalDurationSeconds)
@@ -66,7 +71,12 @@ public class ParkingRcmdService {
         for (int index = 0; index < count; index++) {
             var item = evaluated.get(index);
             recommendations.add(new ItemDTO(
-                    index + 1, item.parkingId(), item.name(), item.totalDistanceMeters(), item.totalDurationSeconds()));
+                    index + 1,
+                    item.parkingId(),
+                    item.name(),
+                    item.totalDistanceMeters(),
+                    item.totalDurationSeconds(),
+                    item.summary()));
         }
 
         return new ParkingRcmdResDTO(candidates.size(), evaluated.size(), List.copyOf(recommendations));
