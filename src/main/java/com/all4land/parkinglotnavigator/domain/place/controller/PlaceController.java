@@ -1,5 +1,6 @@
 package com.all4land.parkinglotnavigator.domain.place.controller;
 
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceCreateReqDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListReqDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResDTO;
 import com.all4land.parkinglotnavigator.domain.place.service.PlaceService;
@@ -10,9 +11,12 @@ import com.all4land.parkinglotnavigator.swagger.PlaceApi;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,7 +30,7 @@ public class PlaceController implements PlaceApi {
     @Override
     @GetMapping("/list")
     public ApiResDTO<CmmListResDTO<PlaceResDTO>> getPlaces(
-            @Valid @ModelAttribute @ParameterObject PlaceListReqDTO request) {
+        @Valid @ModelAttribute @ParameterObject PlaceListReqDTO request) {
         CmmListResDTO<PlaceResDTO> response = placeService.getPlaces(request);
         return ApiResDTO.success(EnCmmScssCode.OK, response);
     }
@@ -36,5 +40,17 @@ public class PlaceController implements PlaceApi {
     public ApiResDTO<PlaceResDTO> getPlace(@PathVariable("id") Long id) {
         PlaceResDTO response = placeService.getPlace(id);
         return ApiResDTO.success(EnCmmScssCode.OK, response);
+    }
+
+    @PostMapping
+    public ApiResDTO<PlaceResDTO> createPlace(@Valid @RequestBody PlaceCreateReqDTO request) {
+        PlaceResDTO response = placeService.createPlace(request);
+        return ApiResDTO.success(EnCmmScssCode.OK, response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResDTO<Long> deletePlace(@PathVariable("id") Long id) {
+        placeService.deletePlace(id);
+        return ApiResDTO.success(EnCmmScssCode.OK, id);
     }
 }

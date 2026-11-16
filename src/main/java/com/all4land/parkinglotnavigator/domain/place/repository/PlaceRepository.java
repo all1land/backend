@@ -1,5 +1,6 @@
 package com.all4land.parkinglotnavigator.domain.place.repository;
 
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceCreateReqDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListReqDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResDTO;
 import java.sql.ResultSet;
@@ -44,6 +45,43 @@ public class PlaceRepository {
     private static final String LIST_SQL = SELECT_SQL + CONDITIONS + " ORDER BY p.id ASC LIMIT :limit OFFSET :offset";
     private static final String DETAIL_SQL = SELECT_SQL + " FROM tb_place p WHERE p.id = :id AND p.deleted_at IS NULL";
 
+    private static final String INSERT_SQL = """
+            INSERT INTO tb_place (
+                name,
+                category_code,
+                road_name_address,
+                lot_number_address,
+                zip_code,
+                phone,
+                location,
+                entrance_location
+            )
+            VALUES (
+                :name,
+                :categoryCode,
+                :roadNameAddress,
+                :lotNumberAddress,
+                :zipCode,
+                :phone,
+                ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
+                CASE
+                    WHEN :entranceLatitude IS NULL OR :entranceLongitude IS NULL THEN NULL
+                    ELSE ST_SetSRID(
+                        ST_MakePoint(:entranceLongitude, :entranceLatitude),
+                        4326
+                    )::geography
+                END
+            )
+            RETURNING id
+            """;
+
+    private static final String DELETE_SQL = """
+            UPDATE tb_place
+               SET deleted_at = CURRENT_TIMESTAMP
+             WHERE id = :id
+               AND deleted_at IS NULL
+            """;
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     public long countInBounds(PlaceListReqDTO request) {
@@ -52,42 +90,62 @@ public class PlaceRepository {
 
     public List<PlaceResDTO> findInBounds(PlaceListReqDTO request) {
         var parameters = new MapSqlParameterSource(parameters(request))
-                .addValue("limit", request.getPageSize())
-                .addValue("offset", (long) (request.getPageIndex() - 1) * request.getPageSize());
+            .addValue("limit", request.getPageSize())
+            .addValue("offset", (long) (request.getPageIndex() - 1) * request.getPageSize());
         return jdbcTemplate.query(LIST_SQL, parameters, this::mapPlace);
     }
 
     private Map<String, Object> parameters(PlaceListReqDTO request) {
         return Map.of(
-                "minLat",
-                request.getMinLat(),
-                "minLon",
-                request.getMinLon(),
-                "maxLat",
-                request.getMaxLat(),
-                "maxLon",
-                request.getMaxLon(),
-                "keyword",
-                request.getKeyword());
+            "minLat",
+            request.getMinLat(),
+            "minLon",
+            request.getMinLon(),
+            "maxLat",
+            request.getMaxLat(),
+            "maxLon",
+            request.getMaxLon(),
+            "keyword",
+            request.getKeyword());
     }
 
     public Optional<PlaceResDTO> findById(Long id) {
         return jdbcTemplate.query(DETAIL_SQL, Map.of("id", id), this::mapPlace).stream()
-                .findFirst();
+            .findFirst();
+    }
+
+    public Long insert(PlaceCreateReqDTO request) {
+        var parameters = new MapSqlParameterSource()
+            .addValue("name", request.getName())
+            .addValue("categoryCode", request.getCategoryCode())
+            .addValue("roadNameAddress", request.getRoadNameAddress())
+            .addValue("lotNumberAddress", request.getLotNumberAddress())
+            .addValue("zipCode", request.getZipCode())
+            .addValue("phone", request.getPhone())
+            .addValue("latitude", request.getLatitude())
+            .addValue("longitude", request.getLongitude())
+            .addValue("entranceLatitude", request.getEntranceLatitude())
+            .addValue("entranceLongitude", request.getEntranceLongitude());
+
+        return jdbcTemplate.queryForObject(INSERT_SQL, parameters, Long.class);
+    }
+
+    public int softDelete(Long id) {
+        return jdbcTemplate.update(DELETE_SQL, Map.of("id", id));
     }
 
     private PlaceResDTO mapPlace(ResultSet rs, int rowNum) throws SQLException {
         return new PlaceResDTO(
-                rs.getString("poi_id"),
-                rs.getString("name"),
-                rs.getString("category_code"),
-                rs.getString("road_name_address"),
-                rs.getString("lot_number_address"),
-                rs.getString("zip_code"),
-                rs.getString("phone"),
-                rs.getDouble("latitude"),
-                rs.getDouble("longitude"),
-                rs.getObject("entrance_latitude", Double.class),
-                rs.getObject("entrance_longitude", Double.class));
+            rs.getString("poi_id"),
+            rs.getString("name"),
+            rs.getString("category_code"),
+            rs.getString("road_name_address"),
+            rs.getString("lot_number_address"),
+            rs.getString("zip_code"),
+            rs.getString("phone"),
+            rs.getDouble("latitude"),
+            rs.getDouble("longitude"),
+            rs.getObject("entrance_latitude", Double.class),
+            rs.getObject("entrance_longitude", Double.class));
     }
 }
