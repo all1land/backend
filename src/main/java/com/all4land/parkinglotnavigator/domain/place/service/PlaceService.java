@@ -1,5 +1,6 @@
 package com.all4land.parkinglotnavigator.domain.place.service;
 
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceCreateReqDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListReqDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResDTO;
 import com.all4land.parkinglotnavigator.domain.place.repository.PlaceRepository;
@@ -51,11 +52,37 @@ public class PlaceService {
 
     @Transactional(readOnly = true)
     public PlaceResDTO getPlace(Long id) {
-        if (id == null || id <= 0) {
-            throw new BusinessException(EnCmmErrCode.VALIDATION_ERROR, "장소 ID는 양수여야 합니다.");
-        }
+        validateId(id);
         return placeRepository
                 .findById(id)
                 .orElseThrow(() -> new BusinessException(EnCmmErrCode.NOT_FOUND, "장소 정보를 찾을 수 없습니다."));
+    }
+
+    @Transactional
+    public PlaceResDTO createPlace(PlaceCreateReqDTO request) {
+        if (request == null || !validator.validate(request).isEmpty()) {
+            throw new BusinessException(EnCmmErrCode.VALIDATION_ERROR, "장소 등록 정보를 확인해주세요.");
+        }
+
+        Long id = placeRepository.insert(request);
+        return placeRepository
+                .findById(id)
+                .orElseThrow(() -> new BusinessException(EnCmmErrCode.NOT_FOUND, "등록된 장소 정보를 찾을 수 없습니다."));
+    }
+
+    @Transactional
+    public void deletePlace(Long id) {
+        validateId(id);
+
+        int affectedRows = placeRepository.softDelete(id);
+        if (affectedRows == 0) {
+            throw new BusinessException(EnCmmErrCode.NOT_FOUND, "삭제할 장소 정보를 찾을 수 없습니다.");
+        }
+    }
+
+    private void validateId(Long id) {
+        if (id == null || id <= 0) {
+            throw new BusinessException(EnCmmErrCode.VALIDATION_ERROR, "장소 ID는 양수여야 합니다.");
+        }
     }
 }
