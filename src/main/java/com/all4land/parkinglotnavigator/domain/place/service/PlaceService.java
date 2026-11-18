@@ -32,7 +32,7 @@ public class PlaceService {
         long total = placeRepository.countInBounds(request);
         List<PlaceResDTO> items = total == 0 ? List.of() : placeRepository.findInBounds(request);
         return CmmListResDTO.fromPage(
-            items, total, request.getPageIndex(), request.getPageSize(), appliedFilter(request));
+                items, total, request.getPageIndex(), request.getPageSize(), appliedFilter(request));
     }
 
     private CmmFilterDTO appliedFilter(PlaceListReqDTO request) {
@@ -54,8 +54,8 @@ public class PlaceService {
     public PlaceResDTO getPlace(Long id) {
         validateId(id);
         return placeRepository
-            .findById(id)
-            .orElseThrow(() -> new BusinessException(EnCmmErrCode.NOT_FOUND, "장소 정보를 찾을 수 없습니다."));
+                .findById(id)
+                .orElseThrow(() -> new BusinessException(EnCmmErrCode.NOT_FOUND, "장소 정보를 찾을 수 없습니다."));
     }
 
     @Transactional
@@ -66,8 +66,8 @@ public class PlaceService {
 
         Long id = placeRepository.insert(request);
         return placeRepository
-            .findById(id)
-            .orElseThrow(() -> new BusinessException(EnCmmErrCode.NOT_FOUND, "등록된 장소 정보를 찾을 수 없습니다."));
+                .findById(id)
+                .orElseThrow(() -> new BusinessException(EnCmmErrCode.NOT_FOUND, "등록된 장소 정보를 찾을 수 없습니다."));
     }
 
     @Transactional

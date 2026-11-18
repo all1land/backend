@@ -90,42 +90,42 @@ public class PlaceRepository {
 
     public List<PlaceResDTO> findInBounds(PlaceListReqDTO request) {
         var parameters = new MapSqlParameterSource(parameters(request))
-            .addValue("limit", request.getPageSize())
-            .addValue("offset", (long) (request.getPageIndex() - 1) * request.getPageSize());
+                .addValue("limit", request.getPageSize())
+                .addValue("offset", (long) (request.getPageIndex() - 1) * request.getPageSize());
         return jdbcTemplate.query(LIST_SQL, parameters, this::mapPlace);
     }
 
     private Map<String, Object> parameters(PlaceListReqDTO request) {
         return Map.of(
-            "minLat",
-            request.getMinLat(),
-            "minLon",
-            request.getMinLon(),
-            "maxLat",
-            request.getMaxLat(),
-            "maxLon",
-            request.getMaxLon(),
-            "keyword",
-            request.getKeyword());
+                "minLat",
+                request.getMinLat(),
+                "minLon",
+                request.getMinLon(),
+                "maxLat",
+                request.getMaxLat(),
+                "maxLon",
+                request.getMaxLon(),
+                "keyword",
+                request.getKeyword());
     }
 
     public Optional<PlaceResDTO> findById(Long id) {
         return jdbcTemplate.query(DETAIL_SQL, Map.of("id", id), this::mapPlace).stream()
-            .findFirst();
+                .findFirst();
     }
 
     public Long insert(PlaceCreateReqDTO request) {
         var parameters = new MapSqlParameterSource()
-            .addValue("name", request.getName())
-            .addValue("categoryCode", request.getCategoryCode())
-            .addValue("roadNameAddress", request.getRoadNameAddress())
-            .addValue("lotNumberAddress", request.getLotNumberAddress())
-            .addValue("zipCode", request.getZipCode())
-            .addValue("phone", request.getPhone())
-            .addValue("latitude", request.getLatitude())
-            .addValue("longitude", request.getLongitude())
-            .addValue("entranceLatitude", request.getEntranceLatitude())
-            .addValue("entranceLongitude", request.getEntranceLongitude());
+                .addValue("name", request.getName())
+                .addValue("categoryCode", request.getCategoryCode())
+                .addValue("roadNameAddress", request.getRoadNameAddress())
+                .addValue("lotNumberAddress", request.getLotNumberAddress())
+                .addValue("zipCode", request.getZipCode())
+                .addValue("phone", request.getPhone())
+                .addValue("latitude", request.getLatitude())
+                .addValue("longitude", request.getLongitude())
+                .addValue("entranceLatitude", request.getEntranceLatitude())
+                .addValue("entranceLongitude", request.getEntranceLongitude());
 
         return jdbcTemplate.queryForObject(INSERT_SQL, parameters, Long.class);
     }
@@ -136,16 +136,16 @@ public class PlaceRepository {
 
     private PlaceResDTO mapPlace(ResultSet rs, int rowNum) throws SQLException {
         return new PlaceResDTO(
-            rs.getString("poi_id"),
-            rs.getString("name"),
-            rs.getString("category_code"),
-            rs.getString("road_name_address"),
-            rs.getString("lot_number_address"),
-            rs.getString("zip_code"),
-            rs.getString("phone"),
-            rs.getDouble("latitude"),
-            rs.getDouble("longitude"),
-            rs.getObject("entrance_latitude", Double.class),
-            rs.getObject("entrance_longitude", Double.class));
+                rs.getString("poi_id"),
+                rs.getString("name"),
+                rs.getString("category_code"),
+                rs.getString("road_name_address"),
+                rs.getString("lot_number_address"),
+                rs.getString("zip_code"),
+                rs.getString("phone"),
+                rs.getDouble("latitude"),
+                rs.getDouble("longitude"),
+                rs.getObject("entrance_latitude", Double.class),
+                rs.getObject("entrance_longitude", Double.class));
     }
 }

@@ -30,7 +30,7 @@ public class PlaceController implements PlaceApi {
     @Override
     @GetMapping("/list")
     public ApiResDTO<CmmListResDTO<PlaceResDTO>> getPlaces(
-        @Valid @ModelAttribute @ParameterObject PlaceListReqDTO request) {
+            @Valid @ModelAttribute @ParameterObject PlaceListReqDTO request) {
         CmmListResDTO<PlaceResDTO> response = placeService.getPlaces(request);
         return ApiResDTO.success(EnCmmScssCode.OK, response);
     }
