@@ -10,15 +10,19 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ParkingRcmdService {
 
     private static final int MAX_CANDIDATES = 50;
+    private static final int MAX_EVALUATED_CANDIDATES = 10;
 
     private final ParkingLotService parkingLotService;
     private final RouteService routeService;
@@ -38,27 +42,52 @@ public class ParkingRcmdService {
             throw new BusinessException(EnCmmErrCode.BAD_REQUEST, "추천 후보가 50개를 초과했습니다. 검색 반경을 줄여주세요.");
         }
 
+        if (candidates.isEmpty()) {
+            return new ParkingRcmdResDTO(0, 0, List.of());
+        }
+
         var origin = request.origin();
         var departurePoi = request.departurePoi();
+
+        var evaluationCandidates =
+                candidates.stream().limit(MAX_EVALUATED_CANDIDATES).toList();
+
+        var departureWalking = routeService.prepareDepartureWalking(
+                origin.latitude(), origin.longitude(), departurePoi.latitude(), departurePoi.longitude());
+
         List<ItemDTO> evaluated = new ArrayList<>();
+        BusinessException lastRouteFailure = null;
 
-        for (var parking : candidates) {
-            var route = routeService.route(
-                    origin.latitude(),
-                    origin.longitude(),
-                    departurePoi.latitude(),
-                    departurePoi.longitude(),
-                    parking.id(),
-                    destination.latitude(),
-                    destination.longitude());
+        for (var parking : evaluationCandidates) {
+            try {
+                var route = routeService.routeWithPreparedDepartureWalking(
+                        departureWalking,
+                        origin.latitude(),
+                        origin.longitude(),
+                        departurePoi.latitude(),
+                        departurePoi.longitude(),
+                        parking.id(),
+                        destination.latitude(),
+                        destination.longitude());
 
-            evaluated.add(new ItemDTO(
-                    0,
-                    parking.id(),
-                    parking.name(),
-                    route.totalDistanceMeters(),
-                    route.totalDurationSeconds(),
-                    route.summary()));
+                evaluated.add(new ItemDTO(
+                        0,
+                        parking.id(),
+                        parking.name(),
+                        route.totalDistanceMeters(),
+                        route.totalDurationSeconds(),
+                        route.summary()));
+            } catch (BusinessException exception) {
+                lastRouteFailure = exception;
+                log.warn(
+                        "주차장 추천 후보 경로 계산 실패로 제외합니다. parkingId={}, errorCode={}",
+                        parking.id(),
+                        exception.getErrorCode());
+            }
+        }
+
+        if (evaluated.isEmpty() && lastRouteFailure != null) {
+            throw lastRouteFailure;
         }
 
         evaluated.sort(Comparator.comparingLong(ItemDTO::totalDurationSeconds)
