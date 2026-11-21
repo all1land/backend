@@ -14,8 +14,9 @@ public interface ParkingRcmdApi {
 
     @Operation(
             summary = "최적 주차장 추천",
-            description =
-                    "목적지 반경 안의 주차장을 평가하고 전체 소요 시간이 짧은 순서로 반환한다. " + "각 추천 결과의 summary에서 출발 도보·차량·도착 도보 시간을 확인할 수 있다.")
+            description = "목적지 반경 안의 주차장을 가까운 순서로 최대 10개까지 실제 경로 평가하고 전체 소요 시간이 짧은 순서로 반환한다. "
+                    + "candidateCount는 반경 내 전체 후보 수이며 evaluatedCount는 경로 평가에 성공한 후보 수이다. "
+                    + "각 추천 결과의 summary에서 출발 도보·차량·도착 도보 시간을 확인할 수 있다.")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
                 responseCode = "200",
@@ -26,8 +27,8 @@ public interface ParkingRcmdApi {
                                   "code": "COMMON_200_001",
                                   "message": "성공적으로 요청을 처리했습니다.",
                                   "data": {
-                                    "candidateCount": 2,
-                                    "evaluatedCount": 2,
+                                    "candidateCount": 12,
+                                    "evaluatedCount": 10,
                                     "recommendations": [
                                       {
                                         "rank": 1,

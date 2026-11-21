@@ -8,7 +8,7 @@ public record ParkingRcmdResDTO(
         @Schema(description = "검색 반경 안에서 발견된 후보 수", example = "2")
         int candidateCount,
 
-        @Schema(description = "경로 계산을 완료한 후보 수", example = "2")
+        @Schema(description = "실제 경로 계산에 성공한 후보 수. 최대 10개", example = "10")
         int evaluatedCount,
 
         @Schema(description = "전체 소요 시간이 짧은 순서의 추천 목록") List<ItemDTO> recommendations) {

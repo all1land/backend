@@ -2,6 +2,7 @@ package com.all4land.parkinglotnavigator.domain.route.service;
 
 import com.all4land.parkinglotnavigator.domain.parkinglot.service.ParkingLotService;
 import com.all4land.parkinglotnavigator.domain.route.dto.RouteResDTO;
+import com.all4land.parkinglotnavigator.domain.route.dto.WalkingRouteSegmentDTO;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,48 @@ public class RouteService {
             double destinationLat,
             double destinationLng) {
 
+        var departureWalking = prepareDepartureWalking(originLat, originLng, departurePoiLat, departurePoiLng);
+
+        return routeWithPreparedDepartureWalking(
+                departureWalking,
+                originLat,
+                originLng,
+                departurePoiLat,
+                departurePoiLng,
+                parkingId,
+                destinationLat,
+                destinationLng);
+    }
+
+    /**
+     * 여러 주차장 후보가 공유하는 출발 도보 구간을 한 번 계산한다.
+     */
+    public List<WalkingRouteSegmentDTO> prepareDepartureWalking(
+            double originLat, double originLng, double departurePoiLat, double departurePoiLng) {
+
+        validateCoordinate(originLat, originLng);
+        validateCoordinate(departurePoiLat, departurePoiLng);
+
+        return walkingRouteService.route(originLat, originLng, departurePoiLat, departurePoiLng);
+    }
+
+    /**
+     * 미리 계산한 출발 도보 구간을 재사용하여 주차장 후보별 통합 경로를 만든다.
+     */
+    public RouteResDTO routeWithPreparedDepartureWalking(
+            List<WalkingRouteSegmentDTO> departureWalking,
+            double originLat,
+            double originLng,
+            double departurePoiLat,
+            double departurePoiLng,
+            Long parkingId,
+            double destinationLat,
+            double destinationLng) {
+
+        if (departureWalking == null) {
+            throw new IllegalArgumentException("출발 도보 경로는 null일 수 없습니다.");
+        }
+
         validateCoordinate(originLat, originLng);
         validateCoordinate(departurePoiLat, departurePoiLng);
         validateCoordinate(destinationLat, destinationLng);
@@ -51,14 +94,12 @@ public class RouteService {
         double parkingLng = parking.longitude();
         validateCoordinate(parkingLat, parkingLng);
 
-        var firstWalking = walkingRouteService.route(originLat, originLng, departurePoiLat, departurePoiLng);
-
         var driving = drivingRouteService.route(departurePoiLat, departurePoiLng, parkingLat, parkingLng);
 
         var lastWalking = walkingRouteService.route(parkingLat, parkingLng, destinationLat, destinationLng);
 
-        var response = assembler.assemble(
-                List.of(assembler.walking(firstWalking), assembler.driving(driving), assembler.walking(lastWalking)));
+        var response = assembler.assemble(List.of(
+                assembler.walking(departureWalking), assembler.driving(driving), assembler.walking(lastWalking)));
 
         validateConnection(response, originLat, originLng, destinationLat, destinationLng);
 
