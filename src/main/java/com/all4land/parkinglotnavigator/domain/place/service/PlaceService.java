@@ -2,11 +2,12 @@ package com.all4land.parkinglotnavigator.domain.place.service;
 
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceCreateReqDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListReqDTO;
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListResDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResDTO;
 import com.all4land.parkinglotnavigator.domain.place.repository.PlaceRepository;
 import com.all4land.parkinglotnavigator.global.exception.BusinessException;
 import com.all4land.parkinglotnavigator.global.response.CmmFilterDTO;
-import com.all4land.parkinglotnavigator.global.response.CmmListResDTO;
+import com.all4land.parkinglotnavigator.global.response.CmmPaginationDTO;
 import com.all4land.parkinglotnavigator.global.response.EnCmmErrCode;
 import jakarta.validation.Validator;
 import java.util.LinkedHashMap;
@@ -25,14 +26,15 @@ public class PlaceService {
     private final Validator validator;
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
-    public CmmListResDTO<PlaceResDTO> getPlaces(PlaceListReqDTO request) {
+    public PlaceListResDTO getPlaces(PlaceListReqDTO request) {
         if (request == null || !validator.validate(request).isEmpty()) {
             throw new BusinessException(EnCmmErrCode.VALIDATION_ERROR, "장소 조회 영역과 검색 조건을 확인해주세요.");
         }
-        long total = placeRepository.countInBounds(request);
-        List<PlaceResDTO> items = total == 0 ? List.of() : placeRepository.findInBounds(request);
-        return CmmListResDTO.fromPage(
-                items, total, request.getPageIndex(), request.getPageSize(), appliedFilter(request));
+        var markers = placeRepository.findMarkersInBounds(request);
+        List<PlaceResDTO> items = markers.isEmpty() ? List.of() : placeRepository.findInBounds(request);
+        var pagination =
+                CmmPaginationDTO.of(request.getPageIndex(), request.getPageSize(), items.size(), markers.size());
+        return new PlaceListResDTO(pagination, appliedFilter(request), items, markers);
     }
 
     private CmmFilterDTO appliedFilter(PlaceListReqDTO request) {
