@@ -1,9 +1,9 @@
 package com.all4land.parkinglotnavigator.swagger;
 
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListReqDTO;
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListResDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResDTO;
 import com.all4land.parkinglotnavigator.global.response.ApiResDTO;
-import com.all4land.parkinglotnavigator.global.response.CmmListResDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,7 +23,8 @@ public interface PlaceApi {
                     + "minLat < maxLat, minLon < maxLon이어야 하며 날짜변경선을 가로지르는 영역은 지원하지 않는다. "
                     + "keyword는 선택이며 장소명 또는 도로명 주소에 포함된 문자열로 검색한다. "
                     + "centerLat/centerLon과 zoom은 선택 화면 정보이며 조회 범위나 정렬을 변경하지 않는다. "
-                    + "DB id 오름차순으로 페이지를 나누고 totalCnt는 영역·검색 조건을 만족하는 전체 건수이다.",
+                    + "DB id 오름차순으로 페이지를 나누고 totalCnt는 영역·검색 조건을 만족하는 전체 건수이다. "
+                    + "list는 현재 페이지의 장소 상세 목록이며, markers는 검색 조건에 맞는 전체 장소의 지도 마커 목록이다.",
             parameters = {
                 @Parameter(
                         name = "centerLat",
@@ -44,12 +45,14 @@ public interface PlaceApi {
                           "code": "COMMON_200_001",
                           "message": "성공적으로 요청을 처리했습니다.",
                           "data": {
-                            "pagination": {"pageIndex": 1, "pageSize": 10, "pageNum": 1, "pageCnt": 1, "totalCnt": 1},
+                            "pagination": {"pageIndex": 1, "pageSize": 1, "pageNum": 2, "pageCnt": 1, "totalCnt": 2},
                             "filter": {"keyword": "마곡", "minLat": 37.55, "minLon": 126.82,
                                        "maxLat": 37.58, "maxLon": 126.85, "centerLat": 37.56, "centerLon": 126.83, "zoom": 15},
-                            "list": [{"id": 1, "name": "마곡 목적지", "roadNameAddress": "서울 강서구 예시로 1",
+                            "list": [{"poiId": "1", "categoryCode": "RESTAURANT", "name": "마곡 목적지", "roadNameAddress": "서울 강서구 예시로 1",
                                       "lotNumberAddress": "서울 강서구 마곡동 1", "latitude": 37.56, "longitude": 126.83,
-                                      "entranceLatitude": null, "entranceLongitude": null}]
+                                      "entranceLatitude": null, "entranceLongitude": null}],
+                            "markers": [{"poiId": "1", "categoryCode": "RESTAURANT", "latitude": 37.56, "longitude": 126.83},
+                                        {"poiId": "2", "categoryCode": "RESTAURANT", "latitude": 37.57, "longitude": 126.84}]
                           }
                         }
                         """))),
@@ -69,7 +72,7 @@ public interface PlaceApi {
                 description = "서버 오류 (COMMON_500_001)",
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResDTO.class)))
     })
-    ApiResDTO<CmmListResDTO<PlaceResDTO>> getPlaces(@ParameterObject PlaceListReqDTO request);
+    ApiResDTO<PlaceListResDTO> getPlaces(@ParameterObject PlaceListReqDTO request);
 
     @Operation(
             summary = "장소 상세 조회",

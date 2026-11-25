@@ -2,10 +2,10 @@ package com.all4land.parkinglotnavigator.domain.place.controller;
 
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceCreateReqDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListReqDTO;
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListResDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResDTO;
 import com.all4land.parkinglotnavigator.domain.place.service.PlaceService;
 import com.all4land.parkinglotnavigator.global.response.ApiResDTO;
-import com.all4land.parkinglotnavigator.global.response.CmmListResDTO;
 import com.all4land.parkinglotnavigator.global.response.EnCmmScssCode;
 import com.all4land.parkinglotnavigator.swagger.PlaceApi;
 import jakarta.validation.Valid;
@@ -29,9 +29,8 @@ public class PlaceController implements PlaceApi {
 
     @Override
     @GetMapping("/list")
-    public ApiResDTO<CmmListResDTO<PlaceResDTO>> getPlaces(
-            @Valid @ModelAttribute @ParameterObject PlaceListReqDTO request) {
-        CmmListResDTO<PlaceResDTO> response = placeService.getPlaces(request);
+    public ApiResDTO<PlaceListResDTO> getPlaces(@Valid @ModelAttribute @ParameterObject PlaceListReqDTO request) {
+        PlaceListResDTO response = placeService.getPlaces(request);
         return ApiResDTO.success(EnCmmScssCode.OK, response);
     }
 

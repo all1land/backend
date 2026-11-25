@@ -83,8 +83,8 @@ public class PlaceListReqDTO {
         return keyword;
     }
 
-    @Schema(description = "현재 페이지 (1부터 시작)", example = "1", defaultValue = "1", minimum = "1", maximum = "200")
-    @Max(200) public int getPageIndex() {
+    @Schema(description = "현재 페이지 (1부터 시작)", example = "1", defaultValue = "1", minimum = "1")
+    public int getPageIndex() {
         return pageIndex;
     }
 

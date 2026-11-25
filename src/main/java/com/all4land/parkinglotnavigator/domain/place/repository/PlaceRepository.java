@@ -2,6 +2,7 @@ package com.all4land.parkinglotnavigator.domain.place.repository;
 
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceCreateReqDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceListReqDTO;
+import com.all4land.parkinglotnavigator.domain.place.dto.PlaceMarkerResDTO;
 import com.all4land.parkinglotnavigator.domain.place.dto.PlaceResDTO;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,6 +42,13 @@ public class PlaceRepository {
                    ST_Y(p.entrance_location::geometry) AS entrance_latitude,
                    ST_X(p.entrance_location::geometry) AS entrance_longitude
             """;
+
+    private static final String MARKERS_SQL = """
+            SELECT p.id::text AS poi_id,
+                   p.category_code,
+                   ST_Y(p.location::geometry) AS latitude,
+                   ST_X(p.location::geometry) AS longitude
+            """ + CONDITIONS + " ORDER BY p.id ASC";
 
     private static final String LIST_SQL = SELECT_SQL + CONDITIONS + " ORDER BY p.id ASC LIMIT :limit OFFSET :offset";
     private static final String DETAIL_SQL = SELECT_SQL + " FROM tb_place p WHERE p.id = :id AND p.deleted_at IS NULL";
@@ -84,8 +92,15 @@ public class PlaceRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public long countInBounds(PlaceListReqDTO request) {
-        return jdbcTemplate.queryForObject("SELECT count(*) " + CONDITIONS, parameters(request), Long.class);
+    public List<PlaceMarkerResDTO> findMarkersInBounds(PlaceListReqDTO request) {
+        return jdbcTemplate.query(
+                MARKERS_SQL,
+                parameters(request),
+                (rs, rowNum) -> new PlaceMarkerResDTO(
+                        rs.getString("poi_id"),
+                        rs.getString("category_code"),
+                        rs.getDouble("latitude"),
+                        rs.getDouble("longitude")));
     }
 
     public List<PlaceResDTO> findInBounds(PlaceListReqDTO request) {
