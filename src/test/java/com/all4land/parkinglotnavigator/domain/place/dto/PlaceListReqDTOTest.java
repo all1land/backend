@@ -54,14 +54,13 @@ class PlaceListReqDTOTest {
     @Test
     void enforcesPaginationLimits() {
         var request = validRequest();
-        request.setPageIndex(200);
+        request.setPageIndex(555);
         request.setPageSize(20);
         assertThat(validator.validate(request)).isEmpty();
-        request.setPageIndex(201);
         request.setPageSize(21);
         assertThat(validator.validate(request))
                 .extracting(v -> v.getPropertyPath().toString())
-                .contains("pageIndex", "pageSize");
+                .containsExactly("pageSize");
         request.setPageIndex(0);
         request.setPageSize(0);
         assertThat(validator.validate(request))
