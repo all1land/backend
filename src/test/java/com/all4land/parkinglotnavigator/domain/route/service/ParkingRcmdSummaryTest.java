@@ -36,7 +36,18 @@ class ParkingRcmdSummaryTest {
 
         when(parkingLots.getNearbyParkingLots(37.5673, 126.8270, 1000.0)).thenReturn(List.of(parking));
 
-        when(routes.route(anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyLong(), anyDouble(), anyDouble()))
+        when(routes.prepareDepartureWalking(37.5586, 126.8377, 37.5585, 126.8376))
+                .thenReturn(List.of());
+
+        when(routes.routeWithPreparedDepartureWalking(
+                        anyList(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyLong(),
+                        anyDouble(),
+                        anyDouble()))
                 .thenReturn(new RouteResDTO(List.of(), 1000, 120, summary));
 
         var response = service.recommend(request);

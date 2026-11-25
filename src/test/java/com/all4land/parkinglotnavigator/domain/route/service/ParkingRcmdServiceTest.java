@@ -35,20 +35,47 @@ class ParkingRcmdServiceTest {
 
     private ParkingLotNearbyResDTO candidate(long id) {
         return new ParkingLotNearbyResDTO(
-                id, "parking-" + id, null, 10, 37.5667867, 126.8177876, 100.0, null, null, null, null, null, null);
+                id,
+                "parking-" + id,
+                null,
+                10,
+                37.5667867,
+                126.8177876,
+                (double) id,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 
     private void candidates(List<ParkingLotNearbyResDTO> values) {
         when(parking.getNearbyParkingLots(37.5673, 126.8270, 1000.0)).thenReturn(values);
     }
 
-    @Test
-    void evaluatesAllCandidatesBeforeApplyingLimitAndSortsTies() {
-        candidates(List.of(candidate(4), candidate(3), candidate(2), candidate(1)));
+    private void preparedDepartureWalking() {
+        when(routes.prepareDepartureWalking(37.5586, 126.8377, 37.5585, 126.8376))
+                .thenReturn(List.of());
+    }
 
-        when(routes.route(anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyLong(), anyDouble(), anyDouble()))
+    @Test
+    void evaluatesNearestTenCandidatesBeforeApplyingLimitAndSortsTies() {
+        candidates(LongStream.rangeClosed(1, 12).mapToObj(this::candidate).toList());
+
+        preparedDepartureWalking();
+
+        when(routes.routeWithPreparedDepartureWalking(
+                        anyList(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyLong(),
+                        anyDouble(),
+                        anyDouble()))
                 .thenAnswer(invocation -> {
-                    long id = invocation.getArgument(4);
+                    long id = invocation.getArgument(5);
                     long seconds = id == 4 ? 300 : 100;
                     long meters = id == 3 ? 200 : 100;
                     return new RouteResDTO(List.of(), meters, seconds);
@@ -56,13 +83,23 @@ class ParkingRcmdServiceTest {
 
         var response = service.recommend(request(2));
 
-        assertThat(response.candidateCount()).isEqualTo(4);
-        assertThat(response.evaluatedCount()).isEqualTo(4);
+        assertThat(response.candidateCount()).isEqualTo(12);
+        assertThat(response.evaluatedCount()).isEqualTo(10);
         assertThat(response.recommendations()).extracting(ItemDTO::parkingId).containsExactly(1L, 2L);
-        assertThat(response.recommendations()).extracting(ItemDTO::rank).containsExactly(1, 2);
 
-        for (long id = 1; id <= 4; id++) {
-            verify(routes).route(37.5586, 126.8377, 37.5585, 126.8376, id, 37.5673, 126.8270);
+        verify(routes, times(1)).prepareDepartureWalking(37.5586, 126.8377, 37.5585, 126.8376);
+
+        for (long id = 11; id <= 12; id++) {
+            verify(routes, never())
+                    .routeWithPreparedDepartureWalking(
+                            anyList(),
+                            anyDouble(),
+                            anyDouble(),
+                            anyDouble(),
+                            anyDouble(),
+                            eq(id),
+                            anyDouble(),
+                            anyDouble());
         }
     }
 
@@ -75,34 +112,84 @@ class ParkingRcmdServiceTest {
         assertThat(response.candidateCount()).isZero();
         assertThat(response.evaluatedCount()).isZero();
         assertThat(response.recommendations()).isEmpty();
+
         verifyNoInteractions(routes);
     }
 
     @Test
-    void tooManyCandidatesAreRejectedWithoutTruncating() {
+    void tooManyCandidatesAreRejectedWithoutRouting() {
         candidates(LongStream.rangeClosed(1, 51).mapToObj(this::candidate).toList());
 
         assertThatThrownBy(() -> service.recommend(request(3)))
-                .isInstanceOfSatisfying(BusinessException.class, e -> assertThat(e.getErrorCode())
+                .isInstanceOfSatisfying(BusinessException.class, exception -> assertThat(exception.getErrorCode())
                         .isEqualTo(EnCmmErrCode.BAD_REQUEST));
 
         verifyNoInteractions(routes);
     }
 
     @Test
-    void routeFailureIsPropagatedEvenAfterEarlierCandidateSucceeded() {
+    void skipsFailedCandidateAndReturnsSuccessfulRecommendations() {
         candidates(List.of(candidate(1), candidate(2), candidate(3)));
+        preparedDepartureWalking();
 
-        when(routes.route(anyDouble(), anyDouble(), anyDouble(), anyDouble(), eq(1L), anyDouble(), anyDouble()))
+        when(routes.routeWithPreparedDepartureWalking(
+                        anyList(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        eq(1L),
+                        anyDouble(),
+                        anyDouble()))
                 .thenReturn(new RouteResDTO(List.of(), 100, 100));
 
+        when(routes.routeWithPreparedDepartureWalking(
+                        anyList(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        eq(2L),
+                        anyDouble(),
+                        anyDouble()))
+                .thenThrow(new BusinessException(EnRouteErrCode.DRIVING_ROUTE_NOT_FOUND));
+
+        when(routes.routeWithPreparedDepartureWalking(
+                        anyList(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        eq(3L),
+                        anyDouble(),
+                        anyDouble()))
+                .thenReturn(new RouteResDTO(List.of(), 80, 90));
+
+        var response = service.recommend(request(1));
+
+        assertThat(response.candidateCount()).isEqualTo(3);
+        assertThat(response.evaluatedCount()).isEqualTo(2);
+        assertThat(response.recommendations()).extracting(ItemDTO::parkingId).containsExactly(3L);
+    }
+
+    @Test
+    void propagatesFailureWhenAllEvaluatedCandidatesFail() {
+        candidates(List.of(candidate(1), candidate(2)));
+        preparedDepartureWalking();
+
         var failure = new BusinessException(EnRouteErrCode.DRIVING_ROUTE_NOT_FOUND);
-        when(routes.route(anyDouble(), anyDouble(), anyDouble(), anyDouble(), eq(2L), anyDouble(), anyDouble()))
+
+        when(routes.routeWithPreparedDepartureWalking(
+                        anyList(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyDouble(),
+                        anyLong(),
+                        anyDouble(),
+                        anyDouble()))
                 .thenThrow(failure);
 
         assertThatThrownBy(() -> service.recommend(request(1))).isSameAs(failure);
-
-        verify(routes, never())
-                .route(anyDouble(), anyDouble(), anyDouble(), anyDouble(), eq(3L), anyDouble(), anyDouble());
     }
 }
